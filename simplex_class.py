@@ -1,10 +1,11 @@
-import numpy as np
+from typing import Optional
 from problem_class import Problem
+import numpy as np
 
 class Simplex:
-	def __init__(self, problem: object) -> None:
-			self.problem = problem
-			self.artificial_problem = None
+	def __init__(self, problem: Problem) -> None:
+			self.problem: Problem = problem
+			self.artificial_problem: Optional[Problem] = None
 
 	##### PUBLIC METHODS ------------------------------------------------------------------------------------------------ #
 
