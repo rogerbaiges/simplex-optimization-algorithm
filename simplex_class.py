@@ -1,0 +1,34 @@
+
+class Simplex:
+	def __init__(self, c, A, b):
+		self.c = c
+		self.A = A
+		self.b = b
+		self.m = len(A)
+		self.n = len(A[0])
+		self.B = list(range(self.n - self.m, self.n))
+		self.N = list(range(self.n - self.m))
+		self.x = [0] * self.n
+		self.z = 0
+
+	def pivot(self, l, e):
+		self.B[l], self.N[e] = self.N[e], self.B[l]
+		self.A[l] = [self.A[l][j] / self.A[l][e] for j in range(self.n)]
+		self.b[l] /= self.A[l][e]
+		for i in range(self.m):
+			if i != l:
+				self.A[i] = [self.A[i][j] - self.A[i][e] * self.A[l][j] for j in range(self.n)]
+				self.b[i] -= self.A[i][e] * self.b[l]
+		self.z += self.c[self.N[e]] * self.b[l]
+		self.c = [self.c[j] - self.c[self.N[e]] * self.A[l][j] for j in range(self.n)]
+		self.x[self.N[e]] = self.b[l]
+		self.x = [0 if j not in self.B else self.x[j] for j in range(self.n)]
+
+	def solve(self):
+		while min(self.c) < 0:
+			e = self.c.index(min(self.c))
+			if all(self.A[i][e] <= 0 for i in range(self.m)):
+				return None
+			l = min(i for i in range(self.m) if self.A[i][e] > 0 and self.b[i] / self.A[i][e] >= 0)
+			self.pivot(l, e)
+		return self.x
