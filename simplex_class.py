@@ -58,28 +58,6 @@ class Simplex:
 
 
 
-
-
-
-
-line = 'OPT/GIA/FIB Curso 2022-23, ejercicio implementacion del simplex : cjt. datos  1, problema PL 1'
-
-if f'datos  {1}' in line and 'PL 1' in line:
-	print('yes')
-else:
-	print('cai gei')
-
-
-
-
-
-
-
-
-
-
-
-
 	# def __init__(self, c, A, b):
 	# 	self.c = c
 	# 	self.A = A
