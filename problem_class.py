@@ -81,3 +81,6 @@ class Problem:
 		self.c = np.array([self.dtype(x) for x in c_line])
 		self.A = np.array([[self.dtype(x) for x in line] for line in A_lines])  # Asegura que line no esté vacío
 		self.b = np.array([self.dtype(x) for x in b_line])
+
+	def __str__(self) -> str:
+		return f'c=\n{self.c}\n\nA=\n{self.A}\n\nb=\n{self.b}\n\nSolution=\n{self.solution}'
