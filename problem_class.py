@@ -3,17 +3,28 @@ from numpy.typing import NDArray
 import numpy as np
 
 class Problem:
-	def __init__(self, data_id: Optional[int] = None, problem_id: Optional[int] = None, dtype = np.int32) -> None:
-		assert (data_id is not None and problem_id is not None) or (data_id is None and problem_id is None), 'Both data_id and problem_id must be None or not None'
+	def __init__(self, 
+			  	data_id: Optional[int] = None, 
+			  	problem_id: Optional[int] = None, 
+			  	dtype = np.int32,
+			  	c: Optional[NDArray] = None,
+				A: Optional[NDArray] = None,
+				b: Optional[NDArray] = None
+				) -> None:
+
+		assert data_id is None == problem_id is None, 'Both data_id and problem_id must be None or not None'
+		assert c is None == A is None == b is None, 'c, A and b must be all None or all not None'
+		if data_id is not None and c is not None:
+			print('Warning: c, A, b are not None, but data_id, problem_id are not None too. The problem will be read from file.')
 
 		self.dtype = dtype
 
 		self.data_id: Optional[int] = data_id
 		self.problem_id: Optional[int] = problem_id
 
-		self.c: Optional[NDArray[dtype]] = None
-		self.A: Optional[NDArray[dtype]] = None
-		self.b: Optional[NDArray[dtype]] = None
+		self.c: Optional[NDArray[dtype]] = c
+		self.A: Optional[NDArray[dtype]] = A
+		self.b: Optional[NDArray[dtype]] = b
 
 		self.solution: Optional[NDArray[dtype]]
 
