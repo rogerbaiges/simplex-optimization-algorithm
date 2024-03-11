@@ -3,13 +3,15 @@ from problem_class import Problem
 import numpy as np
 
 class Simplex:
-	def __init__(self, problem: Problem) -> None:
-			self.problem: Problem = problem
+	def __init__(self) -> None:
+			self.problem: Optional[Problem] = None
 			self.artificial_problem: Optional[Problem] = None
 
 	##### PUBLIC METHODS ------------------------------------------------------------------------------------------------ #
 
-	def solve(self) -> None:
+	def solve(self, problem: Problem) -> None:
+		self.problem = problem
+		self.artificial_problem = None
 		self.__phase1()
 		self.__phase2()
 		pass
@@ -24,7 +26,7 @@ class Simplex:
 
 		pass
 
-	def __phase2(self, ) -> None:
+	def __phase2(self) -> None:
 		pass
 
 	### Methods for the execution of the algorithm
