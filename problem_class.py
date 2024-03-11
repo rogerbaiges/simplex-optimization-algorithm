@@ -18,33 +18,63 @@ class Problem:
 
 	def __read_problem(self) -> None:
 		with open(f'./data/data.txt', 'r') as file:
-			line = file.readline()
+			truncated_input = False
 
+			# Advancing to the required problem
+			line = file.readline()
 			while f'datos {self.data_id}' not in line and f'PL {self.problem_id}' not in line:
 				line = file.readline()
 
+			# Reading c
 			while 'c=' not in line:
 				line = file.readline()
+			
+			line = file.readline()
+			while (not line.strip()) or ('column' in line.lower()):
+				line = file.readline()
+				if 'column' in line.lower():
+					truncated_input = True
 
-			c_line = file.readline().strip()
+			c_line = line.strip().split()
 
+			if truncated_input:
+				while (not line.strip()) or ('column' in line.lower()):
+					line = file.readline()
+
+				c_line += line.strip().split()
+
+			# Reading A
+			line = file.readline()
 			while 'A=' not in line:
 				line = file.readline()
 
 			A_lines = []
-			line = file.readline().strip()
+			line = file.readline()
+			while (not line.strip()) or ('column' in line.lower()):
+				line = file.readline()
+
+			line = line.strip()
 			while line:  
-				A_lines.append(line)
+				A_lines.append(line.split())
 				line = file.readline().strip()
 
+			if truncated_input:
+				while (not line.strip()) or ('column' in line.lower()):
+					line = file.readline()
+
+				for i in range(len(A_lines)):
+					A_lines[i] += line.split()
+					line = file.readline().strip()
+
+			# Reading b
 			while 'b=' not in line:
 				line = file.readline()
 
-			b_line = file.readline().strip()
+			b_line = file.readline().strip().split()
 
-		self.c = np.array([int(x) for x in c_line.split()])
-		self.A = np.array([[int(x) for x in line.split()] for line in A_lines if line])  # Asegura que line no esté vacío
-		self.b = np.array([int(x) for x in b_line.split()])
+		self.c = np.array([int(x) for x in c_line])
+		self.A = np.array([[int(x) for x in line] for line in A_lines])  # Asegura que line no esté vacío
+		self.b = np.array([int(x) for x in b_line])
 			
 
 			
