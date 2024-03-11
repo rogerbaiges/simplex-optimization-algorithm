@@ -21,7 +21,7 @@ class Simplex:
 	#### Methods for each phase
 
 	def __phase1(self) -> None:
-		self.artificial_problem = Problem()
+		self.__generate_artificial_problem()
 		self.__run(self.artificial_problem)
 
 		pass
@@ -53,12 +53,11 @@ class Simplex:
 
 	# Other methods
 
-	def __update_B_inv(self) -> None:
+	def __generate_artificial_problem(self) -> None:
 		pass
 
-
-
-
+	def __update_B_inv(self) -> None:
+		pass
 
 	# def __init__(self, c, A, b):
 	# 	self.c = c
