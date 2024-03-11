@@ -3,15 +3,19 @@ from numpy.typing import NDArray
 import numpy as np
 
 class Problem:
-	def __init__(self, data_id: Optional[int] = None, problem_id: Optional[int] = None) -> None:
+	def __init__(self, data_id: Optional[int] = None, problem_id: Optional[int] = None, dtype = np.int32) -> None:
 		assert (data_id is not None and problem_id is not None) or (data_id is None and problem_id is None), 'Both data_id and problem_id must be None or not None'
+
+		self.dtype = dtype
 
 		self.data_id: Optional[int] = data_id
 		self.problem_id: Optional[int] = problem_id
 
-		self.c: Optional[NDArray[np.int64]] = None
-		self.A: Optional[NDArray[np.int64]] = None
-		self.b: Optional[NDArray[np.int64]] = None
+		self.c: Optional[NDArray[dtype]] = None
+		self.A: Optional[NDArray[dtype]] = None
+		self.b: Optional[NDArray[dtype]] = None
+
+		self.solution: Optional[NDArray[dtype]]
 
 		if data_id is not None and problem_id is not None:
 			self.__read_problem()
@@ -31,13 +35,14 @@ class Problem:
 			
 			line = file.readline()
 			while (not line.strip()) or ('column' in line.lower()):
-				line = file.readline()
 				if 'column' in line.lower():
 					truncated_input = True
+				line = file.readline()
 
 			c_line = line.strip().split()
 
 			if truncated_input:
+				line = file.readline()
 				while (not line.strip()) or ('column' in line.lower()):
 					line = file.readline()
 
@@ -72,18 +77,7 @@ class Problem:
 
 			b_line = file.readline().strip().split()
 
-		self.c = np.array([int(x) for x in c_line])
-		self.A = np.array([[int(x) for x in line] for line in A_lines])  # Asegura que line no esté vacío
-		self.b = np.array([int(x) for x in b_line])
-			
-
-			
-			
-
-
-
-					
-
-					
-
-
+		# Convert to numpy array
+		self.c = np.array([self.dtype(x) for x in c_line])
+		self.A = np.array([[self.dtype(x) for x in line] for line in A_lines])  # Asegura que line no esté vacío
+		self.b = np.array([self.dtype(x) for x in b_line])
