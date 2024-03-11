@@ -26,7 +26,7 @@ class Problem:
 		self.A: Optional[NDArray[dtype]] = A
 		self.b: Optional[NDArray[dtype]] = b
 
-		self.solution: Optional[NDArray[dtype]]
+		self.solution: Optional[NDArray] = None
 
 		if data_id is not None and problem_id is not None:
 			self.__read_problem()
