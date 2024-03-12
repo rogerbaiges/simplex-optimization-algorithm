@@ -27,6 +27,7 @@ class Problem:
 		self.b: Optional[NDArray[dtype]] = b
 
 		self.solution: Optional[NDArray] = None
+		self.Z: Optional[np.float64] = None
 
 		if data_id is not None and problem_id is not None:
 			self.__read_problem()
@@ -94,4 +95,4 @@ class Problem:
 		self.b = np.array([self.dtype(x) for x in b_line])
 
 	def __str__(self) -> str:
-		return f'c=\n{self.c}\n\nA=\n{self.A}\n\nb=\n{self.b}\n\nSolution=\n{self.solution}'
+		return f'c=\n{self.c}\n\nA=\n{self.A}\n\nb=\n{self.b}\n\nSolution=\n{self.solution}\n\nZ={self.Z}'

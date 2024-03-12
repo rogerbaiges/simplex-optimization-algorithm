@@ -1,17 +1,30 @@
 from typing import Optional
 from problem_class import Problem
+from numpy.typing import NDArray
 import numpy as np
 
 class Simplex:
 	def __init__(self) -> None:
-			self.problem: Optional[Problem] = None
-			self.artificial_problem: Optional[Problem] = None
+		self.problem: Optional[Problem] = None
+		self.artificial_problem: Optional[Problem] = None
+		self.B_variables: Optional[NDArray] = None
+		self.N_variables: Optional[NDArray] = None
+		self.B: Optional[NDArray] = None
+		self.B_inv: Optional[NDArray] = None
+		self.C_B: Optional[NDArray] = None
+		self.C_N: Optional[NDArray] = None
+		self.X_B: Optional[NDArray] = None
+		self.Z: Optional[np.float64] = None
+		self.n: Optional[np.int32] = None
+		self.m: Optional[np.int32] = None
 
 	##### PUBLIC METHODS ------------------------------------------------------------------------------------------------ #
 
 	def solve(self, problem: Problem) -> None:
+		assert problem.c is not None, 'The problem must have the c vector'
+		assert problem.A is not None, 'The problem must have the A matrix'
+		assert problem.b is not None, 'The problem must have the b vector'
 		self.problem = problem
-		self.artificial_problem = None
 		self.__phase1()
 		self.__phase2()
 		pass
@@ -20,18 +33,26 @@ class Simplex:
 
 	#### Methods for each phase
 
+	def __initialize_values(self, problem: Problem, is_artificial: bool = True) -> None:
+		self.m, self.n = problem.A.shape
+
+
+		pass
+
 	def __phase1(self) -> None:
 		self.__generate_artificial_problem()
-		self.__run(self.artificial_problem)
+		self.__run(problem=self.artificial_problem)
 
 		pass
 
 	def __phase2(self) -> None:
+		self.__run(problem=self.problem)
 		pass
 
 	### Methods for the execution of the algorithm
 
 	def __run(self, problem: Problem) -> None:
+		self.__initialize_values(problem=problem)
 		pass
 
 	## Methods for each step
@@ -54,40 +75,31 @@ class Simplex:
 	# Other methods
 
 	def __generate_artificial_problem(self) -> None:
-		pass
-
+		"""
+		Generates the artificial problem for the phase 1 of the simplex algorithm.
+		"""
+		A =
+		c =
+		b =
+		
+		self.artificial_problem = Problem(A=A, c=c, b=b)
 	def __update_B_inv(self) -> None:
 		pass
 
-	# def __init__(self, c, A, b):
-	# 	self.c = c
-	# 	self.A = A
-	# 	self.b = b
-	# 	self.m = len(A)
-	# 	self.n = len(A[0])
-	# 	self.B = list(range(self.n - self.m, self.n))
-	# 	self.N = list(range(self.n - self.m))
-	# 	self.x = [0] * self.n
-	# 	self.z = 0
+	def __reduced_costs(self):
+		pass
 
-	# def pivot(self, l, e):
-	# 	self.B[l], self.N[e] = self.N[e], self.B[l]
-	# 	self.A[l] = [self.A[l][j] / self.A[l][e] for j in range(self.n)]
-	# 	self.b[l] /= self.A[l][e]
-	# 	for i in range(self.m):
-	# 		if i != l:
-	# 			self.A[i] = [self.A[i][j] - self.A[i][e] * self.A[l][j] for j in range(self.n)]
-	# 			self.b[i] -= self.A[i][e] * self.b[l]
-	# 	self.z += self.c[self.N[e]] * self.b[l]
-	# 	self.c = [self.c[j] - self.c[self.N[e]] * self.A[l][j] for j in range(self.n)]
-	# 	self.x[self.N[e]] = self.b[l]
-	# 	self.x = [0 if j not in self.B else self.x[j] for j in range(self.n)]
+	def __calculate_solution(self) -> None:
+		pass
 
-	# def solve(self):
-	# 	while min(self.c) < 0:
-	# 		e = self.c.index(min(self.c))
-	# 		if all(self.A[i][e] <= 0 for i in range(self.m)):
-	# 			return None
-	# 		l = min(i for i in range(self.m) if self.A[i][e] > 0 and self.b[i] / self.A[i][e] >= 0)
-	# 		self.pivot(l, e)
-	# 	return self.x
+	def __select_enetering_variable(self):
+		pass
+
+	def __select_leaving_variable(self):
+		pass
+
+	def __pivot(self, entering, leaving) -> None:
+		pass
+
+	def __is_optimal(self) -> None:
+		pass
