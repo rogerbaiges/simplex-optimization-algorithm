@@ -12,9 +12,9 @@ class Problem:
 				b: Optional[NDArray] = None
 				) -> None:
 
-		assert data_id is None == problem_id is None, 'Both data_id and problem_id must be None or not None'
-		assert c is None == A is None == b is None, 'c, A and b must be all None or all not None'
-		if data_id is not None and c is not None:
+		assert (data_id is None) == (problem_id is None), 'Both data_id and problem_id must be None or not None'
+		assert (c is None) == (A is None) == (b is None), 'c, A and b must be all None or all not None'
+		if (data_id is not None) and (c is not None):
 			print('Warning: c, A, b are not None, but data_id, problem_id are not None too. The problem will be read from file.')
 
 		self.dtype = dtype
