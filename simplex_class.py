@@ -4,7 +4,7 @@ from numpy.typing import NDArray
 import numpy as np
 
 class Simplex:
-	def __init__(self, print_results: bool = False, print_iters: bool = False) -> None:
+	def __init__(self, print_results: bool = False, print_iters: bool = False, save_results: bool = True) -> None:
 		self.problem: Optional[Problem] = None
 		self.artificial_problem: Optional[Problem] = None
 		self.B_variables: Optional[NDArray] = None
@@ -19,6 +19,7 @@ class Simplex:
 		self.m: Optional[np.int32] = None
 		self.print_info: bool = print_results
 		self.print_iters: bool = print_iters
+		self.save_results: bool = save_results
 
 	##### PUBLIC METHODS ------------------------------------------------------------------------------------------------ #
 
