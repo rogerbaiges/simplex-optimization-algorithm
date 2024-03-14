@@ -9,6 +9,7 @@ class Simplex:
 		self.artificial_problem: Optional[Problem] = None
 		self.B_variables: Optional[NDArray] = None
 		self.N_variables: Optional[NDArray] = None
+		self.A_N: Optional[NDArray] = None
 		self.B: Optional[NDArray] = None
 		self.B_inv: Optional[NDArray] = None
 		self.C_B: Optional[NDArray] = None
@@ -46,6 +47,7 @@ class Simplex:
 			self.N_variables = np.arange(start=0, stop=self.n - self.m, step=1, dtype=np.int32)
 			self.B = np.identity(n=self.m, dtype=np.int32)
 			self.B_inv = np.identity(n=self.m, dtype=np.int32)
+			self.A_N = problem.A[:, self.N_variables]
 			self.C_B = np.ones(self.m, dtype=np.int32)
 			self.C_N = np.zeros(self.n - self.m, dtype=np.int32)
 			self.X_B = problem.b
@@ -55,13 +57,14 @@ class Simplex:
 			assert self.B_inv is not None, 'The B_inv must be initialized'
 			# B_variables, B and B_inv are already calculated in the artificial problem
 			self.N_variables = np.setdiff1d(np.arange(start=0, stop=self.n, step=1, dtype=np.int32), self.B_variables)
+			self.A_N = problem.A[:, self.N_variables]
 			self.C_B = problem.c[self.B_variables]
 			self.C_N = problem.c[self.N_variables]
 			self.X_B = np.dot(self.B_inv, problem.b)
 			self.__calculate_z()
 
 		word_print = 'ART. ' if is_artificial else ''
-		print(f'--------------- INITIAL VALUES {word_print}PROBLEM ---------------\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
+		print(f'--------------- INITIAL VALUES {word_print}PROBLEM ---------------\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
 
 	def __phase1(self) -> str:
 		self.__generate_artificial_problem()
@@ -137,7 +140,7 @@ class Simplex:
 		"""
 		Calculates the feasible basic direction of the problem.
 		"""
-		d_B = -np.dot(self.B_inv, self.problem.A[:, index_entering])
+		d_B = -np.dot(self.B_inv, self.A_N[:, index_entering])
 		return d_B
 
 	def __calculate_solution(self):
@@ -176,16 +179,17 @@ class Simplex:
 		var_entering = self.N_variables[index_entering]
 		var_leaving = self.B_variables[index_leaving]
 		
-		self.B[:, index_leaving] = problem.A[:, index_entering]
-		self.B_inv = self.__update_B_inv()
 		self.B_variables[index_leaving] = var_entering
 		self.N_variables[index_entering] = var_leaving
+		self.A_N[:, index_entering] = problem.A[:, var_leaving]
+		self.B[:, index_leaving] = problem.A[:, var_entering]
+		self.B_inv = self.__update_B_inv()
 		self.C_B[index_leaving] = problem.c[var_entering]
 		self.C_N[index_entering] = problem.c[var_leaving]
-		self.X_B = self.X_B + theta * d_B
+		self.X_B = np.array([theta if i == index_leaving else self.X_B[i] + theta * d_B[i] for i in range(self.m)])
 		self.__calculate_z(theta, reduced_costs[index_entering])
 
-		print(f'FINAL ITER VALUES:\n\nd_B={d_B}\nTheta={theta}\n\nVariable entering --> {var_entering}\nVariable leaving --> {var_leaving}\n\nB_variables={self.B_variables}\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nX_B={self.X_B}\n\nC_B={self.C_B}\nC_N={self.C_N}\n\nZ={self.Z}\n')
+		print(f'FINAL ITER VALUES:\n\nR={reduced_costs}\n\nd_B={d_B}\nTheta={theta}\n\nVariable entering --> {var_entering}\nVariable leaving --> {var_leaving}\n\nB_variables={self.B_variables}\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nX_B={self.X_B}\n\nC_B={self.C_B}\nC_N={self.C_N}\n\nZ={self.Z}\n')
 	
 	def __is_optimal(self, reduced_costs: NDArray) -> bool:
 		"""
