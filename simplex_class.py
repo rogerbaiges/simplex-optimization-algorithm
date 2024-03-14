@@ -30,17 +30,19 @@ class Simplex:
 		self.problem = problem
 
 		ph1_finish_state = self.__phase1()
-		print('----------------------------------------\n')
-		if self.artificial_problem.Z > 1e-3:
-			ph1_finish_state = 'infeasible'
-		print(f'Finished artificial problem ({ph1_finish_state})')
-		print(f'Solutions:\n\tvb* = {self.artificial_problem.solution}\n\tZ = {self.artificial_problem.Z}')
+		if self.print_info:
+			print('----------------------------------------\n')
+			if self.artificial_problem.Z > 1e-3:
+				ph1_finish_state = 'infeasible'
+			print(f'Finished artificial problem ({ph1_finish_state})')
+			print(f'Solution:\n\tvb = {self.artificial_problem.vb}\n\txb = {self.artificial_problem.xb}\n\tr = {self.artificial_problem.r}\n\tZ = {self.artificial_problem.Z}')
 		
 		if ph1_finish_state == 'optimal':
 			ph2_finish_state = self.__phase2()
-			print('----------------------------------------\n')
-			print(f'Finished problem ({ph2_finish_state})')
-			print(f'Solutions:\n\tvb* = {self.problem.solution}\n\tZ = {self.problem.Z}')
+			if self.print_info:
+				print('----------------------------------------\n')
+				print(f'Finished problem ({ph2_finish_state})')
+				print(f'Solution:\n\tvb = {self.problem.vb}\n\txb = {self.problem.xb}\n\tr = {self.problem.r}\n\tZ = {self.problem.Z}')
 
 	##### PRIVATE METHODS ----------------------------------------------------------------------------------------------- #
 
@@ -93,7 +95,7 @@ class Simplex:
 		while True:
 			reduced_costs = self.__calculate_reduced_costs()
 			if self.__is_optimal(reduced_costs=reduced_costs):
-				self.__calculate_solution(problem=problem)
+				self.__save_solution_in_problem(problem=problem, reduced_costs=reduced_costs)
 				state = 'optimal'
 				break
 			index_entering = self.__select_entering_variable(reduced_costs=reduced_costs)
@@ -150,14 +152,14 @@ class Simplex:
 		d_B = -np.dot(self.B_inv, self.A_N[:, index_entering])
 		return d_B
 
-	def __calculate_solution(self, problem: Problem):
+	def __save_solution_in_problem(self, problem: Problem, reduced_costs: NDArray) -> None:
 		"""
 		Calculates the values of all the variables of the problem.
 		"""
-		problem.solution = np.zeros(self.n)
-		problem.solution[self.B_variables] = self.X_B
+		problem.xb = self.X_B
 		problem.Z = self.Z
-		return problem.solution
+		problem.vb = self.B_variables
+		problem.r = reduced_costs
 
 	def __select_entering_variable(self, reduced_costs: NDArray) -> Optional[int]:
 		"""
