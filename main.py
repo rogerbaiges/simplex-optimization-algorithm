@@ -11,4 +11,15 @@ if __name__ == '__main__':
 	for p in problems:
 		simplex.solve(p)
 		print(p)
-		print('\n----------------------------------------\n\n')
+		print('\n----------------------------------------\n')
+
+	# for	d in range(1, 67):
+	# 	for p in range(3, 5):
+	# 		problem = Problem(data_id=d, problem_id=p)
+	# 		simplex.solve(problem)
+	# 		if p == 3:
+	# 			if problem.state != 'infeasible':
+	# 				print(f'data_id = {d}, problem_id = {p}, state = {problem.state}')
+	# 		elif p == 4:
+	# 			if problem.state != 'unbounded':
+	# 				print(f'data_id = {d}, problem_id = {p}, state = {problem.state}')
