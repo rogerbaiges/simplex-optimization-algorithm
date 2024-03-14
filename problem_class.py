@@ -1,6 +1,7 @@
 from typing import Optional
 from numpy.typing import NDArray
 import numpy as np
+import re
 
 class Problem:
 	def __init__(self, 
@@ -30,6 +31,7 @@ class Problem:
 		self.xb: Optional[NDArray] = None
 		self.Z: Optional[np.float64] = None
 		self.r: Optional[NDArray] = None
+		self.state: Optional[str] = None
 
 		if (data_id is not None) and (problem_id is not None):
 			self.__read_problem()
@@ -38,9 +40,13 @@ class Problem:
 		with open(f'./data/data.txt', 'r') as file:
 			truncated_input = False
 
-			# Advancing to the required problem
+			# Advancing to the required problem			
+			regex_data_id = r'datos\s+{}'.format(re.escape(str(self.data_id)))
+			regex_problem_id = r'PL\s+{}'.format(re.escape(str(self.problem_id)))
 			line = file.readline()
-			while (f'datos {self.data_id}' not in line) and (f'PL {self.problem_id}' not in line):
+			while True:
+				if re.search(regex_data_id, line) and re.search(regex_problem_id, line):
+					break
 				line = file.readline()
 
 			# Reading c
@@ -81,12 +87,13 @@ class Problem:
 				while (not line.strip()) or ('column' in line.lower()):
 					line = file.readline()
 
-				for i in range(len(A_lines)):
-					A_lines[i] += line.split()
-					line = file.readline().strip()
+				if not 'b=' in line:
+					for i in range(len(A_lines)):
+						A_lines[i] += line.split()
+						line = file.readline().strip()
 
 			# Reading b
-			while 'b=' not in line:
+			while not 'b=' in line:
 				line = file.readline()
 
 			b_line = file.readline().strip().split()
@@ -97,4 +104,4 @@ class Problem:
 		self.b = np.array([self.dtype(x) for x in b_line])
 
 	def __str__(self) -> str:
-		return f'c=\n{self.c}\n\nA=\n{self.A}\n\nb=\n{self.b}\n\nvb=\n{self.vb}\n\nxb=\n{self.xb}\n\nZ={self.Z}\n\nr=\n{self.r}\n'
+		return f'DATA_ID={self.data_id}\nPROBLEM_ID={self.problem_id}\n\nSOLUTION ({self.state}):\n\tvb={self.vb}\n\n\txb={self.xb}\n\n\tZ={self.Z}\n\n\tr={self.r}'
