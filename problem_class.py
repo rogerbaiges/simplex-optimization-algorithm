@@ -38,7 +38,7 @@ class Problem:
 
 			# Advancing to the required problem
 			line = file.readline()
-			while f'datos {self.data_id}' not in line and f'PL {self.problem_id}' not in line:
+			while (f'datos {self.data_id}' not in line) and (f'PL {self.problem_id}' not in line):
 				line = file.readline()
 
 			# Reading c

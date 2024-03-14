@@ -10,7 +10,6 @@ class Simplex:
 		self.B_variables: Optional[NDArray] = None
 		self.N_variables: Optional[NDArray] = None
 		self.A_N: Optional[NDArray] = None
-		self.B: Optional[NDArray] = None
 		self.B_inv: Optional[NDArray] = None
 		self.C_B: Optional[NDArray] = None
 		self.C_N: Optional[NDArray] = None
@@ -31,7 +30,7 @@ class Simplex:
 
 		ph1_finish_state = self.__phase1()
 		print('----------------------------------------\n')
-		if self.artificial_problem.Z != 0:
+		if self.artificial_problem.Z > 1e-3:
 			ph1_finish_state = 'infeasible'
 		print(f'Finished artificial problem ({ph1_finish_state})')
 		print(f'Solutions:\n\tvb* = {self.artificial_problem.solution}\n\tZ = {self.artificial_problem.Z}')
@@ -52,7 +51,6 @@ class Simplex:
 		if is_artificial:
 			self.B_variables = np.arange(start=self.n - self.m, stop=self.n, step=1, dtype=np.int32)
 			self.N_variables = np.arange(start=0, stop=self.n - self.m, step=1, dtype=np.int32)
-			self.B = np.identity(n=self.m, dtype=np.int32)
 			self.B_inv = np.identity(n=self.m, dtype=np.int32)
 			self.A_N = problem.A[:, self.N_variables]
 			self.C_B = np.ones(self.m, dtype=np.int32)
@@ -72,7 +70,7 @@ class Simplex:
 
 		if self.print_info:
 			word_print = 'ART. ' if is_artificial else ''
-			print(f'--------------- INITIAL VALUES {word_print}PROBLEM ---------------\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
+			print(f'--------------- INITIAL VALUES {word_print}PROBLEM ---------------\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
 
 	def __phase1(self) -> str:
 		self.__generate_artificial_problem()
@@ -191,14 +189,13 @@ class Simplex:
 		self.B_variables[index_leaving] = var_entering
 		self.N_variables[index_entering] = var_leaving
 		self.A_N[:, index_entering] = problem.A[:, var_leaving]
-		self.B[:, index_leaving] = problem.A[:, var_entering]
 		self.B_inv = self.__update_B_inv(index_leaving=index_leaving, d_B=d_B)
 		self.C_B[index_leaving] = problem.c[var_entering]
 		self.C_N[index_entering] = problem.c[var_leaving]
 		self.X_B = np.array([theta if i == index_leaving else self.X_B[i] + theta * d_B[i] for i in range(self.m)])
 
 		if self.print_iters:
-			print(f'FINAL ITER VALUES:\n\nR={reduced_costs}\n\nd_B={d_B}\nTheta={theta}\n\nVariable entering --> {var_entering}\nVariable leaving --> {var_leaving}\n\nB_variables={self.B_variables}\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nX_B={self.X_B}\n\nC_B={self.C_B}\nC_N={self.C_N}\n\nZ={self.Z}\n')
+			print(f'FINAL ITER VALUES:\n\nR={reduced_costs}\n\nd_B={d_B}\nTheta={theta}\n\nVariable entering --> {var_entering}\nVariable leaving --> {var_leaving}\n\nB_variables={self.B_variables}\nN_variables={self.N_variables}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nX_B={self.X_B}\n\nC_B={self.C_B}\nC_N={self.C_N}\n\nZ={self.Z}\n')
 	
 	def __is_optimal(self, reduced_costs: NDArray) -> bool:
 		"""
