@@ -4,7 +4,7 @@ from numpy.typing import NDArray
 import numpy as np
 
 class Simplex:
-	def __init__(self) -> None:
+	def __init__(self, print_results: bool = False, print_iters: bool = False) -> None:
 		self.problem: Optional[Problem] = None
 		self.artificial_problem: Optional[Problem] = None
 		self.B_variables: Optional[NDArray] = None
@@ -18,6 +18,8 @@ class Simplex:
 		self.Z: Optional[np.float64] = None
 		self.n: Optional[np.int32] = None
 		self.m: Optional[np.int32] = None
+		self.print_info: bool = print_results
+		self.print_iters: bool = print_iters
 
 	##### PUBLIC METHODS ------------------------------------------------------------------------------------------------ #
 
@@ -28,12 +30,17 @@ class Simplex:
 		self.problem = problem
 
 		ph1_finish_state = self.__phase1()
+		print('----------------------------------------\n')
+		if self.artificial_problem.Z != 0:
+			ph1_finish_state = 'infeasible'
 		print(f'Finished artificial problem ({ph1_finish_state})')
+		print(f'Solutions:\n\tvb* = {self.artificial_problem.solution}\n\tZ = {self.artificial_problem.Z}')
 		
 		if ph1_finish_state == 'optimal':
 			ph2_finish_state = self.__phase2()
+			print('----------------------------------------\n')
 			print(f'Finished problem ({ph2_finish_state})')
-			print(f'Solutions:\nvb* = {self.problem.solution}\nZ = {self.Z}')
+			print(f'Solutions:\n\tvb* = {self.problem.solution}\n\tZ = {self.problem.Z}')
 
 	##### PRIVATE METHODS ----------------------------------------------------------------------------------------------- #
 
@@ -63,8 +70,9 @@ class Simplex:
 			self.X_B = np.dot(self.B_inv, problem.b)
 			self.__calculate_z()
 
-		word_print = 'ART. ' if is_artificial else ''
-		print(f'--------------- INITIAL VALUES {word_print}PROBLEM ---------------\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
+		if self.print_info:
+			word_print = 'ART. ' if is_artificial else ''
+			print(f'--------------- INITIAL VALUES {word_print}PROBLEM ---------------\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
 
 	def __phase1(self) -> str:
 		self.__generate_artificial_problem()
@@ -86,7 +94,7 @@ class Simplex:
 		while True:
 			reduced_costs = self.__calculate_reduced_costs()
 			if self.__is_optimal(reduced_costs=reduced_costs):
-				self.__calculate_solution()
+				self.__calculate_solution(problem=problem)
 				state = 'optimal'
 				break
 			index_entering = self.__select_entering_variable(reduced_costs=reduced_costs)
@@ -97,17 +105,14 @@ class Simplex:
 				break
 			index_leaving, theta = self.__select_leaving_variable(d_B=d_B)
 
-			word_print = 'Art. ' if is_artificial else ''
-			print(f'---------------[{word_print}Problem: Iter. {iter}]---------------')
+			if self.print_iters:
+				word_print = 'Art. ' if is_artificial else ''
+				print(f'---------------[{word_print}Problem: Iter. {iter}]---------------')
 			
 			self.__pivot(problem=problem, index_entering=index_entering, index_leaving=index_leaving, theta=theta, d_B=d_B, reduced_costs=reduced_costs)
+			self.__calculate_z(theta=theta, r_q=reduced_costs[index_entering])
 
 			iter += 1
-
-		if is_artificial:
-			if self.Z != 0:
-				print(f'The problem is infeasible with Z = {self.Z}')
-				state = 'infeasible'
 
 		return state
 				
@@ -134,7 +139,7 @@ class Simplex:
 		"""
 		Calculates the reduced costs of the problem.
 		"""
-		return self.C_N - np.dot(np.dot(self.C_B, self.B_inv), self.problem.A)
+		return self.C_N - np.dot(np.dot(self.C_B, self.B_inv), self.A_N)
 	
 	def __calculate_feasible_basic_direction(self, index_entering: int) -> NDArray:
 		"""
@@ -143,30 +148,31 @@ class Simplex:
 		d_B = -np.dot(self.B_inv, self.A_N[:, index_entering])
 		return d_B
 
-	def __calculate_solution(self):
+	def __calculate_solution(self, problem: Problem):
 		"""
 		Calculates the values of all the variables of the problem.
 		"""
-		self.problem.solution = np.zeros(self.n)
-		self.problem.solution[self.B_variables] = self.X_B
-		return self.problem.solution
+		problem.solution = np.zeros(self.n)
+		problem.solution[self.B_variables] = self.X_B
+		problem.Z = self.Z
+		return problem.solution
 
 	def __select_entering_variable(self, reduced_costs: NDArray) -> Optional[int]:
 		"""
 		Returns the index of the entering variable of the problem using the Bland's rule.
 		"""
-		for i, r_q in enumerate(reduced_costs):
-			if r_q < 0:
+		for i in np.argsort(self.N_variables):
+			if reduced_costs[i] < 0:
 				return i
 
 	def __select_leaving_variable(self, d_B: NDArray) -> Optional[Tuple[int, np.float64]]:
 		"""
 		Returns the index of the leaving variable of the problem using the Bland's rule, the theta value and the feasible basic direction.
-		"""	
+		"""
 		theta = np.inf
-		for i, d in enumerate(d_B):
-			if d < 0:
-				theta_i = -self.X_B[i] / d
+		for i in np.argsort(self.B_variables):
+			if d_B[i] < 0:
+				theta_i = -self.X_B[i] / d_B[i]
 				if theta_i < theta:
 					theta = theta_i
 					index_leaving = i
@@ -187,9 +193,9 @@ class Simplex:
 		self.C_B[index_leaving] = problem.c[var_entering]
 		self.C_N[index_entering] = problem.c[var_leaving]
 		self.X_B = np.array([theta if i == index_leaving else self.X_B[i] + theta * d_B[i] for i in range(self.m)])
-		self.__calculate_z(theta, reduced_costs[index_entering])
 
-		print(f'FINAL ITER VALUES:\n\nR={reduced_costs}\n\nd_B={d_B}\nTheta={theta}\n\nVariable entering --> {var_entering}\nVariable leaving --> {var_leaving}\n\nB_variables={self.B_variables}\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nX_B={self.X_B}\n\nC_B={self.C_B}\nC_N={self.C_N}\n\nZ={self.Z}\n')
+		if self.print_iters:
+			print(f'FINAL ITER VALUES:\n\nR={reduced_costs}\n\nd_B={d_B}\nTheta={theta}\n\nVariable entering --> {var_entering}\nVariable leaving --> {var_leaving}\n\nB_variables={self.B_variables}\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nX_B={self.X_B}\n\nC_B={self.C_B}\nC_N={self.C_N}\n\nZ={self.Z}\n')
 	
 	def __is_optimal(self, reduced_costs: NDArray) -> bool:
 		"""
@@ -207,6 +213,6 @@ class Simplex:
 		if (theta is not None) and (r_q is not None):
 			assert self.Z is not None, 'The Z value must be initialized before updating it'
 			self.Z = self.Z + theta * r_q
-		else:
-			self.Z = np.dot(self.C_B, self.X_B)
+		
+		self.Z = np.dot(self.C_B, self.X_B)
 		return self.Z
