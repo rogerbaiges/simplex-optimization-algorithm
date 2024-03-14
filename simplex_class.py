@@ -53,15 +53,15 @@ class Simplex:
 		else:
 			assert self.B_variables is not None, 'The B_variables must be initialized'
 			assert self.B_inv is not None, 'The B_inv must be initialized'
-			# B y B_inv las tenemos
-			# N_variables (buscar las variables que no aparecen en B_variables)
+			# B_variables, B and B_inv are already calculated in the artificial problem
 			self.N_variables = np.setdiff1d(np.arange(start=0, stop=self.n, step=1, dtype=np.int32), self.B_variables)
 			self.C_B = problem.c[self.B_variables]
 			self.C_N = problem.c[self.N_variables]
 			self.X_B = np.dot(self.B_inv, problem.b)
 			self.__calculate_z()
 
-		print(f'INITIAL VALUES:\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB={self.B}\n\nB_inv={self.B_inv}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
+		word_print = 'ART. ' if is_artificial else ''
+		print(f'--------------- INITIAL VALUES {word_print}PROBLEM ---------------\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
 
 	def __phase1(self) -> str:
 		self.__generate_artificial_problem()
@@ -81,9 +81,6 @@ class Simplex:
 		iter = 1
 		
 		while True:
-			word_print = 'Art. ' if is_artificial else ''
-			print(f'---------------[{word_print}Problem: Iter. {iter}]---------------')
-
 			reduced_costs = self.__calculate_reduced_costs()
 			if self.__is_optimal(reduced_costs=reduced_costs):
 				self.__calculate_solution()
@@ -96,8 +93,11 @@ class Simplex:
 				state = 'unbounded'
 				break
 			index_leaving, theta = self.__select_leaving_variable(d_B=d_B)
+
+			word_print = 'Art. ' if is_artificial else ''
+			print(f'---------------[{word_print}Problem: Iter. {iter}]---------------')
 			
-			self.__pivot(index_entering=index_entering, index_leaving=index_leaving, theta=theta, d_B=d_B)
+			self.__pivot(problem=problem, index_entering=index_entering, index_leaving=index_leaving, theta=theta, d_B=d_B, reduced_costs=reduced_costs)
 
 			iter += 1
 
@@ -120,7 +120,7 @@ class Simplex:
 		b = self.problem.b
 		self.artificial_problem = Problem(A=A, c=c, b=b)
 
-	def __update_B_inv(self) -> None:
+	def __update_B_inv(self) -> NDArray:
 		"""
 		Updates the B_inv matrix of the problem.
 		"""
@@ -152,9 +152,9 @@ class Simplex:
 		"""
 		Returns the index of the entering variable of the problem using the Bland's rule.
 		"""
-		for j, cost in zip(self.N_variables, reduced_costs):
-			if cost < 0:
-				return j
+		for i, r_q in enumerate(reduced_costs):
+			if r_q < 0:
+				return i
 
 	def __select_leaving_variable(self, d_B: NDArray) -> Optional[Tuple[int, np.float64]]:
 		"""
@@ -169,24 +169,23 @@ class Simplex:
 					index_leaving = i
 		return index_leaving, theta
 
-	def __pivot(self, index_entering: int, index_leaving: int, theta, d_B) -> None:
+	def __pivot(self, problem: Problem, index_entering: int, index_leaving: int, theta, d_B: NDArray, reduced_costs: NDArray) -> None:
 		"""
 		Executes the pivot operation of the simplex algorithm.
 		"""
 		var_entering = self.N_variables[index_entering]
 		var_leaving = self.B_variables[index_leaving]
-		reduced_costs = self.__calculate_reduced_costs()
-
-		self.B[:, index_leaving] = self.problem.A[:, index_entering]
+		
+		self.B[:, index_leaving] = problem.A[:, index_entering]
 		self.B_inv = self.__update_B_inv()
-		self.C_B[index_leaving] = self.problem.c[index_entering]
-		self.C_N[index_entering] = 0
 		self.B_variables[index_leaving] = var_entering
 		self.N_variables[index_entering] = var_leaving
+		self.C_B[index_leaving] = problem.c[var_entering]
+		self.C_N[index_entering] = problem.c[var_leaving]
 		self.X_B = self.X_B + theta * d_B
-		self.Z = self.__calculate_z(theta=theta, r_q=reduced_costs[index_entering])
+		self.__calculate_z(theta, reduced_costs[index_entering])
 
-		print(f'FINAL ITER VALUES:\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
+		print(f'FINAL ITER VALUES:\n\nd_B={d_B}\nTheta={theta}\n\nVariable entering --> {var_entering}\nVariable leaving --> {var_leaving}\n\nB_variables={self.B_variables}\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nX_B={self.X_B}\n\nC_B={self.C_B}\nC_N={self.C_N}\n\nZ={self.Z}\n')
 	
 	def __is_optimal(self, reduced_costs: NDArray) -> bool:
 		"""
