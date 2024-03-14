@@ -17,7 +17,7 @@ class Simplex:
 		self.Z: Optional[np.float64] = None
 		self.n: Optional[np.int32] = None
 		self.m: Optional[np.int32] = None
-		self.print_info: bool = print_results
+		self.print_results: bool = print_results
 		self.print_iters: bool = print_iters
 		self.save_results: bool = save_results
 
@@ -30,19 +30,22 @@ class Simplex:
 		self.problem = problem
 
 		ph1_finish_state = self.__phase1()
-		if self.print_info:
+		if self.print_results:
 			print('----------------------------------------\n')
-			if self.artificial_problem.Z > 1e-3:
-				ph1_finish_state = 'infeasible'
+		if self.artificial_problem.Z > 1e-10:
+			ph1_finish_state = 'infeasible'
+			self.problem.state = 'infeasible'
+		if self.print_results:
 			print(f'Finished artificial problem ({ph1_finish_state})')
 			print(f'Solution:\n\tvb = {self.artificial_problem.vb}\n\txb = {self.artificial_problem.xb}\n\tr = {self.artificial_problem.r}\n\tZ = {self.artificial_problem.Z}')
 		
-		if ph1_finish_state == 'optimal':
+		if ph1_finish_state in ['optimal', 'unbounded']:
 			ph2_finish_state = self.__phase2()
-			if self.print_info:
+			if self.print_results:
 				print('----------------------------------------\n')
 				print(f'Finished problem ({ph2_finish_state})')
 				print(f'Solution:\n\tvb = {self.problem.vb}\n\txb = {self.problem.xb}\n\tr = {self.problem.r}\n\tZ = {self.problem.Z}')
+			self.problem.state = ph2_finish_state
 
 	##### PRIVATE METHODS ----------------------------------------------------------------------------------------------- #
 
@@ -71,7 +74,7 @@ class Simplex:
 			self.X_B = np.dot(self.B_inv, problem.b)
 			self.__calculate_z()
 
-		if self.print_info:
+		if self.print_iters:
 			word_print = 'ART. ' if is_artificial else ''
 			print(f'--------------- INITIAL VALUES {word_print}PROBLEM ---------------\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
 
