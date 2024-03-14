@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union, Literal, Tuple
 from problem_class import Problem
 from numpy.typing import NDArray
 import numpy as np
@@ -26,18 +26,19 @@ class Simplex:
 		assert problem.b is not None, 'The problem must have the b vector'
 		self.problem = problem
 
-		self.__phase1()
-		if self.Z > 0:
-			print('The problem is infeasible.')
-		else:
-			self.__phase2()
-			print(f'The problem was solved and the solutions are:\nvb*={self.problem.solution}\nZ={self.Z})')
+		ph1_finish_state = self.__phase1()
+		print(f'Finished artificial problem ({ph1_finish_state})')
+		
+		if ph1_finish_state == 'optimal':
+			ph2_finish_state = self.__phase2()
+			print(f'Finished problem ({ph2_finish_state})')
+			print(f'Solutions:\nvb* = {self.problem.solution}\nZ = {self.Z}')
 
 	##### PRIVATE METHODS ----------------------------------------------------------------------------------------------- #
 
 	#### Methods for each phase
 
-	def __initialize_values(self, problem: Problem, is_artificial: bool = True) -> None:
+	def __initialize_values(self, problem: Problem, is_artificial: bool = False) -> None:
 		self.m, self.n = problem.A.shape
 
 		if is_artificial:
@@ -62,40 +63,51 @@ class Simplex:
 
 		print(f'INITIAL VALUES:\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB={self.B}\n\nB_inv={self.B_inv}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
 
-	def __phase1(self) -> None:
+	def __phase1(self) -> str:
 		self.__generate_artificial_problem()
-		self.__run(problem=self.artificial_problem)
-		return self.Z
-		
+		finish_state = self.__run(problem=self.artificial_problem, is_artificial=True)
+		return finish_state
 
-	def __phase2(self) -> None:
-		self.__run(problem=self.problem)
+	def __phase2(self) -> str:
+		finish_state = self.__run(problem=self.problem, is_artificial=False)
+		return finish_state
 
 	### Methods for the execution of the algorithm
 
-	def __run(self, problem: Problem) -> None:
-		self.__initialize_values(problem=problem, is_artificial=False if problem == self.problem else True)
+	def __run(self, problem: Problem, is_artificial: bool = False) -> str:
+		self.__initialize_values(problem=problem, is_artificial=is_artificial)
 		
-		# Execute all the simplex algorithm until an optimal solution is found or the problem is unbounded
-
-		i = 0
+		state: Optional[Union[Literal['optimal'], Literal['unbounded'], Literal['infeasible']]] = None
+		iter = 1
+		
 		while True:
-			print('Iteration', i)
-			entering = self.__select_entering_variable()
-			if entering is None: # The problem is optimal
-				self.__calculate_solution()
-				print('The problem is optimal')
-				break
-			
-			leaving = self.__select_leaving_variable(entering=entering)
-			if leaving is None: # The problem is unbounded
-				print('The problem is unbounded')
-				break
-			
-			self.__pivot(entering, leaving)
+			word_print = 'Art. ' if is_artificial else ''
+			print(f'---------------[{word_print}Problem: Iter. {iter}]---------------')
 
-			i += 1
-		
+			reduced_costs = self.__calculate_reduced_costs()
+			if self.__is_optimal(reduced_costs=reduced_costs):
+				self.__calculate_solution()
+				state = 'optimal'
+				break
+			index_entering = self.__select_entering_variable(reduced_costs=reduced_costs)
+
+			d_B = self.__calculate_feasible_basic_direction(index_entering=index_entering)
+			if self.__is_unbounded(d_B=d_B):
+				state = 'unbounded'
+				break
+			index_leaving, theta = self.__select_leaving_variable(d_B=d_B)
+			
+			self.__pivot(index_entering=index_entering, index_leaving=index_leaving, theta=theta, d_B=d_B)
+
+			iter += 1
+
+		if is_artificial:
+			if self.Z != 0:
+				print(f'The problem is infeasible with Z = {self.Z}')
+				state = 'infeasible'
+
+		return state
+				
 	# Other methods
 
 	def __generate_artificial_problem(self) -> None:
@@ -119,14 +131,13 @@ class Simplex:
 		"""
 		Calculates the reduced costs of the problem.
 		"""
-		reduced_costs = self.C_N - np.dot(np.dot(self.C_B, self.B_inv), self.problem.A)
-		return reduced_costs
+		return self.C_N - np.dot(np.dot(self.C_B, self.B_inv), self.problem.A)
 	
-	def __calculate_feasible_basic_direction(self, entering: int):
+	def __calculate_feasible_basic_direction(self, index_entering: int) -> NDArray:
 		"""
 		Calculates the feasible basic direction of the problem.
 		"""
-		d_B = -np.dot(self.B_inv, self.problem.A[:, entering])
+		d_B = -np.dot(self.B_inv, self.problem.A[:, index_entering])
 		return d_B
 
 	def __calculate_solution(self):
@@ -137,53 +148,62 @@ class Simplex:
 		self.problem.solution[self.B_variables] = self.X_B
 		return self.problem.solution
 
-	def __select_entering_variable(self):
+	def __select_entering_variable(self, reduced_costs: NDArray) -> Optional[int]:
 		"""
-		Returns the entering variable of the problem using the Bland's rule.
+		Returns the index of the entering variable of the problem using the Bland's rule.
 		"""
-		reduced_costs = self.__calculate_reduced_costs()
-
-		if np.all(reduced_costs >= 0):
-			return None
-		
 		for j, cost in zip(self.N_variables, reduced_costs):
 			if cost < 0:
 				return j
 
-	def __select_leaving_variable(self, entering: int):
+	def __select_leaving_variable(self, d_B: NDArray) -> Optional[Tuple[int, np.float64]]:
 		"""
-		Returns the leaving variable of the problem using the Bland's rule.
-		"""
-		d_B = self.__calculate_feasible_basic_direction(entering=entering)
-
-		if np.all(d_B >= 0):
-			return None
-		
+		Returns the index of the leaving variable of the problem using the Bland's rule, the theta value and the feasible basic direction.
+		"""	
 		theta = np.inf
 		for i, d in enumerate(d_B):
 			if d < 0:
 				theta_i = -self.X_B[i] / d
 				if theta_i < theta:
 					theta = theta_i
-					leaving = i
-		return leaving
+					index_leaving = i
+		return index_leaving, theta
 
-	def __pivot(self, entering, leaving) -> None:
+	def __pivot(self, index_entering: int, index_leaving: int, theta, d_B) -> None:
 		"""
 		Executes the pivot operation of the simplex algorithm.
 		"""
-		self.B[:, leaving] = self.problem.A[:, entering]
+		var_entering = self.N_variables[index_entering]
+		var_leaving = self.B_variables[index_leaving]
+		reduced_costs = self.__calculate_reduced_costs()
+
+		self.B[:, index_leaving] = self.problem.A[:, index_entering]
 		self.B_inv = self.__update_B_inv()
-		self.B_variables[leaving] = entering
-		self.N_variables = np.setdiff1d(self.N_variables, entering)
-		self.C_B[leaving] = self.problem.c[entering]
-		self.C_N = self.problem.c[self.N_variables]
-		self.X_B = self.X_B - (self.X_B[leaving] / self.B_inv[leaving, leaving]) * self.B_inv[:, leaving]
-		self.__calculate_z()
+		self.C_B[index_leaving] = self.problem.c[index_entering]
+		self.C_N[index_entering] = 0
+		self.B_variables[index_leaving] = var_entering
+		self.N_variables[index_entering] = var_leaving
+		self.X_B = self.X_B + theta * d_B
+		self.Z = self.__calculate_z(theta=theta, r_q=reduced_costs[index_entering])
 
-		print(f'FINAL ITER VALUES:\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB={self.B}\n\nB_inv={self.B_inv}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
+		print(f'FINAL ITER VALUES:\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB=\n{self.B}\n\nB_inv=\n{self.B_inv}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
+	
+	def __is_optimal(self, reduced_costs: NDArray) -> bool:
+		"""
+		Returns True if the problem is optimal.
+		"""
+		return np.all(reduced_costs >= 0)
+	
+	def __is_unbounded(self, d_B: NDArray) -> bool:
+		"""
+		Returns True if the problem is unbounded.
+		"""
+		return np.all(d_B >= 0)
 
-
-	def __calculate_z(self):
-		self.Z = np.dot(self.C_B, self.X_B)
+	def __calculate_z(self, theta = None, r_q = None) -> np.float64:
+		if (theta is not None) and (r_q is not None):
+			assert self.Z is not None, 'The Z value must be initialized before updating it'
+			self.Z = self.Z + theta * r_q
+		else:
+			self.Z = np.dot(self.C_B, self.X_B)
 		return self.Z
