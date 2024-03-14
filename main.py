@@ -14,8 +14,9 @@ if __name__ == '__main__':
 
 	p = Problem(A=A, c=c, b=b)
 
+	p1 = Problem(1,1)
 	s = Simplex()
-	s.solve(p)
+	s.solve(p1)
 
 
 

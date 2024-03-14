@@ -6,7 +6,7 @@ class Problem:
 	def __init__(self, 
 			  	data_id: Optional[int] = None, 
 			  	problem_id: Optional[int] = None, 
-			  	dtype = np.int32,
+			  	dtype = np.int64,
 			  	c: Optional[NDArray] = None,
 				A: Optional[NDArray] = None,
 				b: Optional[NDArray] = None
