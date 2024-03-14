@@ -122,17 +122,20 @@ class Simplex:
 		"""
 		Generates the artificial problem for the phase 1 of the simplex algorithm.
 		"""
-		n, m = self.problem.A.shape
-		A = np.concatenate((self.problem.A, np.identity(n=n)), axis=1)
+		m, n = self.problem.A.shape
+		A = np.concatenate((self.problem.A, np.identity(n=m)), axis=1)
 		c = np.concatenate((np.zeros(n), np.ones(m)))
 		b = self.problem.b
 		self.artificial_problem = Problem(A=A, c=c, b=b)
 
-	def __update_B_inv(self) -> NDArray:
+	def __update_B_inv(self, index_leaving: int, d_B: NDArray) -> NDArray:
 		"""
 		Updates the B_inv matrix of the problem.
 		"""
-		self.B_inv = np.linalg.inv(self.B)
+		E = np.identity(self.m)
+		E[:, index_leaving] = -d_B / d_B[index_leaving]
+		E[index_leaving, index_leaving] = -1 / d_B[index_leaving]
+		self.B_inv = np.dot(E, self.B_inv)
 		return self.B_inv
 
 	def __calculate_reduced_costs(self):
@@ -189,7 +192,7 @@ class Simplex:
 		self.N_variables[index_entering] = var_leaving
 		self.A_N[:, index_entering] = problem.A[:, var_leaving]
 		self.B[:, index_leaving] = problem.A[:, var_entering]
-		self.B_inv = self.__update_B_inv()
+		self.B_inv = self.__update_B_inv(index_leaving=index_leaving, d_B=d_B)
 		self.C_B[index_leaving] = problem.c[var_entering]
 		self.C_N[index_entering] = problem.c[var_leaving]
 		self.X_B = np.array([theta if i == index_leaving else self.X_B[i] + theta * d_B[i] for i in range(self.m)])
