@@ -1,42 +1,42 @@
 PHASE I:
-	* ITER. 1 --> Var. IN = 22 [q = 0], Var. OUT = 0 [B(p) = 2], Theta* = 0.2571, Z = 2110.2571
-	* ITER. 2 --> Var. IN = 25 [q = 2], Var. OUT = 2 [B(p) = 5], Theta* = 0.1825, Z = 2107.9530
-	* ITER. 3 --> Var. IN = 28 [q = 3], Var. OUT = 3 [B(p) = 8], Theta* = 0.2383, Z = 2036.9570
-	* ITER. 4 --> Var. IN = 26 [q = 1], Var. OUT = 1 [B(p) = 6], Theta* = 2.6121, Z = 1785.7547
-	* ITER. 5 --> Var. IN = 29 [q = 4], Var. OUT = 4 [B(p) = 9], Theta* = 0.8786, Z = 1632.2520
-	* ITER. 6 --> Var. IN = 3 [q = 6], Var. OUT = 6 [B(p) = 8], Theta* = 0.3514, Z = 1441.6838
-	* ITER. 7 --> Var. IN = 21 [q = 7], Var. OUT = 7 [B(p) = 1], Theta* = 0.7016, Z = 1388.7696
-	* ITER. 8 --> Var. IN = 1 [q = 9], Var. OUT = 9 [B(p) = 6], Theta* = 2.4054, Z = 829.1329
-	* ITER. 9 --> Var. IN = 4 [q = 6], Var. OUT = 3 [B(p) = 9], Theta* = 0.2317, Z = 767.9056
-	* ITER. 10 --> Var. IN = 27 [q = 10], Var. OUT = 10 [B(p) = 7], Theta* = 0.0457, Z = 734.2192
-	* ITER. 11 --> Var. IN = 0 [q = 9], Var. OUT = 1 [B(p) = 2], Theta* = 0.7929, Z = 688.8565
-	* ITER. 12 --> Var. IN = 1 [q = 5], Var. OUT = 5 [B(p) = 2], Theta* = 0.9589, Z = 584.0347
-	* ITER. 13 --> Var. IN = 20 [q = 11], Var. OUT = 11 [B(p) = 0], Theta* = 0.2675, Z = 332.3419
-	* ITER. 14 --> Var. IN = 3 [q = 9], Var. OUT = 0 [B(p) = 9], Theta* = 0.2760, Z = 322.3765
-	* ITER. 15 --> Var. IN = 24 [q = 5], Var. OUT = 1 [B(p) = 4], Theta* = 0.4080, Z = 199.3176
-	* ITER. 16 --> Var. IN = 0 [q = 12], Var. OUT = 12 [B(p) = 9], Theta* = 0.9351, Z = 189.4742
-	* ITER. 17 --> Var. IN = 9 [q = 6], Var. OUT = 4 [B(p) = 6], Theta* = 0.9595, Z = 188.9214
-	* ITER. 18 --> Var. IN = 11 [q = 8], Var. OUT = 8 [B(p) = 0], Theta* = 0.4713, Z = 188.4509
-	* ITER. 19 --> Var. IN = 23 [q = 13], Var. OUT = 13 [B(p) = 3], Theta* = 0.6987, Z = 0.0000
+	* ITER. 1 --> Var. IN = 0 (N_variables[0]), Var. OUT = 22 (B_variables[2]), Theta* = 0.2571, Z = 2110.2571
+	* ITER. 2 --> Var. IN = 2 (N_variables[2]), Var. OUT = 25 (B_variables[5]), Theta* = 0.1825, Z = 2107.9530
+	* ITER. 3 --> Var. IN = 3 (N_variables[3]), Var. OUT = 28 (B_variables[8]), Theta* = 0.2383, Z = 2036.9570
+	* ITER. 4 --> Var. IN = 1 (N_variables[1]), Var. OUT = 26 (B_variables[6]), Theta* = 2.6121, Z = 1785.7547
+	* ITER. 5 --> Var. IN = 4 (N_variables[4]), Var. OUT = 29 (B_variables[9]), Theta* = 0.8786, Z = 1632.2520
+	* ITER. 6 --> Var. IN = 6 (N_variables[6]), Var. OUT = 3 (B_variables[8]), Theta* = 0.3514, Z = 1441.6838
+	* ITER. 7 --> Var. IN = 7 (N_variables[7]), Var. OUT = 21 (B_variables[1]), Theta* = 0.7016, Z = 1388.7696
+	* ITER. 8 --> Var. IN = 9 (N_variables[9]), Var. OUT = 1 (B_variables[6]), Theta* = 2.4054, Z = 829.1329
+	* ITER. 9 --> Var. IN = 3 (N_variables[6]), Var. OUT = 4 (B_variables[9]), Theta* = 0.2317, Z = 767.9056
+	* ITER. 10 --> Var. IN = 10 (N_variables[10]), Var. OUT = 27 (B_variables[7]), Theta* = 0.0457, Z = 734.2192
+	* ITER. 11 --> Var. IN = 1 (N_variables[9]), Var. OUT = 0 (B_variables[2]), Theta* = 0.7929, Z = 688.8565
+	* ITER. 12 --> Var. IN = 5 (N_variables[5]), Var. OUT = 1 (B_variables[2]), Theta* = 0.9589, Z = 584.0347
+	* ITER. 13 --> Var. IN = 11 (N_variables[11]), Var. OUT = 20 (B_variables[0]), Theta* = 0.2675, Z = 332.3419
+	* ITER. 14 --> Var. IN = 0 (N_variables[9]), Var. OUT = 3 (B_variables[9]), Theta* = 0.2760, Z = 322.3765
+	* ITER. 15 --> Var. IN = 1 (N_variables[5]), Var. OUT = 24 (B_variables[4]), Theta* = 0.4080, Z = 199.3176
+	* ITER. 16 --> Var. IN = 12 (N_variables[12]), Var. OUT = 0 (B_variables[9]), Theta* = 0.9351, Z = 189.4742
+	* ITER. 17 --> Var. IN = 4 (N_variables[6]), Var. OUT = 9 (B_variables[6]), Theta* = 0.9595, Z = 188.9214
+	* ITER. 18 --> Var. IN = 8 (N_variables[8]), Var. OUT = 11 (B_variables[0]), Theta* = 0.4713, Z = 188.4509
+	* ITER. 19 --> Var. IN = 13 (N_variables[13]), Var. OUT = 23 (B_variables[3]), Theta* = 0.6987, Z = -0.0000
 	* Finished artificial problem after 19 iterations with state: Optimal.
 	* Solution:
 		vb = [ 8  7  5 13  1  2  4 10  6 12]
 		xb = [1.10209123 0.77564092 1.49380787 0.69874539 1.10843822 2.47624453
  0.69636339 0.70669779 1.53355286 2.82244287]
 		r = [1. 1. 1. 1. 1. 1. 0. 1. 0. 0. 1. 1. 0. 1. 0. 0. 0. 0. 0. 0.]
-		Z = 0.0
+		Z = -8.526512829121202e-14
 
 PHASE II:
-	* ITER. 1 --> Var. IN = 4 [q = 0], Var. OUT = 0 [B(p) = 6], Theta* = 0.6330, Z = -497.1875
-	* ITER. 2 --> Var. IN = 10 [q = 1], Var. OUT = 3 [B(p) = 7], Theta* = 0.2417, Z = -523.2289
-	* ITER. 3 --> Var. IN = 7 [q = 0], Var. OUT = 4 [B(p) = 1], Theta* = 0.1551, Z = -571.0663
-	* ITER. 4 --> Var. IN = 4 [q = 2], Var. OUT = 9 [B(p) = 1], Theta* = 0.2550, Z = -599.5743
-	* ITER. 5 --> Var. IN = 0 [q = 1], Var. OUT = 10 [B(p) = 6], Theta* = 0.3601, Z = -647.0857
-	* ITER. 6 --> Var. IN = 12 [q = 3], Var. OUT = 11 [B(p) = 9], Theta* = 0.7809, Z = -767.7802
-	* ITER. 7 --> Var. IN = 5 [q = 5], Var. OUT = 15 [B(p) = 2], Theta* = 192.9601, Z = -815.2771
-	* ITER. 8 --> Var. IN = 1 [q = 0], Var. OUT = 7 [B(p) = 4], Theta* = 0.0146, Z = -815.4738
-	* ITER. 9 --> Var. IN = 7 [q = 6], Var. OUT = 16 [B(p) = 4], Theta* = 2.7030, Z = -816.1384
-	* ITER. 10 --> Var. IN = 15 [q = 7], Var. OUT = 17 [B(p) = 2], Theta* = 273.7679, Z = -880.0193
+	* ITER. 1 --> Var. IN = 0 (N_variables[0]), Var. OUT = 4 (B_variables[6]), Theta* = 0.6330, Z = -497.1875
+	* ITER. 2 --> Var. IN = 3 (N_variables[1]), Var. OUT = 10 (B_variables[7]), Theta* = 0.2417, Z = -523.2289
+	* ITER. 3 --> Var. IN = 4 (N_variables[0]), Var. OUT = 7 (B_variables[1]), Theta* = 0.1551, Z = -571.0663
+	* ITER. 4 --> Var. IN = 9 (N_variables[2]), Var. OUT = 4 (B_variables[1]), Theta* = 0.2550, Z = -599.5743
+	* ITER. 5 --> Var. IN = 10 (N_variables[1]), Var. OUT = 0 (B_variables[6]), Theta* = 0.3601, Z = -647.0857
+	* ITER. 6 --> Var. IN = 11 (N_variables[3]), Var. OUT = 12 (B_variables[9]), Theta* = 0.7809, Z = -767.7802
+	* ITER. 7 --> Var. IN = 15 (N_variables[5]), Var. OUT = 5 (B_variables[2]), Theta* = 192.9601, Z = -815.2771
+	* ITER. 8 --> Var. IN = 7 (N_variables[0]), Var. OUT = 1 (B_variables[4]), Theta* = 0.0146, Z = -815.4738
+	* ITER. 9 --> Var. IN = 16 (N_variables[6]), Var. OUT = 7 (B_variables[4]), Theta* = 2.7030, Z = -816.1384
+	* ITER. 10 --> Var. IN = 17 (N_variables[7]), Var. OUT = 15 (B_variables[2]), Theta* = 273.7679, Z = -880.0193
 	* Finished problem after 10 iterations with state: Optimal.
 	* Solution:
 		vb = [ 8  9 17 13 16  2 10  3  6 11]
