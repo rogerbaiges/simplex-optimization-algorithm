@@ -32,6 +32,7 @@ class Problem:
 		self.Z: Optional[np.float64] = None
 		self.r: Optional[NDArray] = None
 		self.state: Optional[str] = None
+		self.iterations: Optional[int] = None
 
 		if (data_id is not None) and (problem_id is not None):
 			self.__read_problem()
