@@ -28,6 +28,9 @@ class Simplex:
 	#### PUBLIC METHODS ------------------------------------------------------------------------------------------------ #
 
 	def solve(self, problem: Problem) -> None:
+		"""
+		Solves the given problem using the simplex algorithm.
+		"""
 		assert problem.c is not None, 'The problem must have the c vector'
 		assert problem.A is not None, 'The problem must have the A matrix'
 		assert problem.b is not None, 'The problem must have the b vector'
@@ -73,6 +76,9 @@ class Simplex:
 	### Methods for each phase
 
 	def __initialize_values(self, problem: Problem, is_artificial: bool = False) -> None:
+		"""
+		Initializes the values of the problem for the simplex algorithm.
+		"""
 		self.m, self.n = problem.A.shape
 
 		if is_artificial:
@@ -104,6 +110,9 @@ class Simplex:
 			self.__print_initial_values(problem=problem)
 
 	def __phase1(self) -> Tuple[str, int]:
+		"""
+		Runs the phase 1 of the simplex algorithm.
+		"""
 		self.__generate_artificial_problem()
 		finish_state, iters = self.__run(problem=self.artificial_problem, is_artificial=True)
 		self.artificial_problem.state = finish_state
@@ -111,6 +120,9 @@ class Simplex:
 		return finish_state, iters
 
 	def __phase2(self) -> Tuple[str, int]:
+		"""
+		Runs the phase 2 of the simplex algorithm.
+		"""
 		finish_state, iters = self.__run(problem=self.problem, is_artificial=False)
 		self.problem.state = finish_state
 		self.problem.iterations = iters
@@ -119,6 +131,9 @@ class Simplex:
 	## Methods for the execution of the algorithm
 
 	def __run(self, problem: Problem, is_artificial: bool = False) -> Tuple[str, int]:
+		"""
+		Runs the simplex algorithm for the given problem.
+		"""
 		self.__initialize_values(problem=problem, is_artificial=is_artificial)
 		
 		state: Optional[Union[Literal['optimal'], Literal['unbounded'], Literal['infeasible']]] = None
@@ -219,7 +234,7 @@ class Simplex:
 
 	def __pivot(self, problem: Problem, index_entering: int, index_leaving: int, theta, d_B: NDArray, reduced_costs: NDArray) -> None:
 		"""
-		Executes the pivot operation of the simplex algorithm.
+		Executes the pivot operation of the simplex algorithm (updates the values of the problem after an iteration).
 		"""
 		var_entering = self.N_variables[index_entering]
 		var_leaving = self.B_variables[index_leaving]
@@ -249,12 +264,15 @@ class Simplex:
 	
 	def __check_if_feasible(self, tolerance: float = 1e-10) -> None:
 		"""
-		Checks if the problem is feasible.
+		Checks if the problem is feasible. If it is not, it changes the state of the problem to 'infeasible'.
 		"""
 		if self.artificial_problem.Z > tolerance:
 			self.problem.state = 'infeasible'
 
 	def __calculate_z(self, theta = None, r_q = None) -> np.float64:
+		"""
+		Calculates, updates and returns the current Z value of the problem.
+		"""
 		if (theta is not None) and (r_q is not None):
 			assert self.Z is not None, 'The Z value must be initialized before updating it'
 			self.Z = self.Z + theta * r_q
