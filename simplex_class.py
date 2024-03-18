@@ -1,4 +1,4 @@
-from typing import Optional, Union, Literal, Tuple
+from typing import Optional, Union, Literal, Tuple, TextIO
 from problem_class import Problem
 from numpy.typing import NDArray
 import numpy as np
@@ -7,6 +7,7 @@ class Simplex:
 	def __init__(self, print_results: bool = False, print_iters: bool = False, save_results: bool = True) -> None:
 		self.problem: Optional[Problem] = None
 		self.artificial_problem: Optional[Problem] = None
+
 		self.B_variables: Optional[NDArray] = None
 		self.N_variables: Optional[NDArray] = None
 		self.A_N: Optional[NDArray] = None
@@ -17,11 +18,14 @@ class Simplex:
 		self.Z: Optional[np.float64] = None
 		self.n: Optional[np.int32] = None
 		self.m: Optional[np.int32] = None
+
 		self.print_results: bool = print_results
 		self.print_iters: bool = print_iters
 		self.save_results: bool = save_results
 
-	##### PUBLIC METHODS ------------------------------------------------------------------------------------------------ #
+		self.results_file: Optional[TextIO] = None
+
+	#### PUBLIC METHODS ------------------------------------------------------------------------------------------------ #
 
 	def solve(self, problem: Problem) -> None:
 		assert problem.c is not None, 'The problem must have the c vector'
@@ -29,27 +33,47 @@ class Simplex:
 		assert problem.b is not None, 'The problem must have the b vector'
 		self.problem = problem
 
-		ph1_finish_state = self.__phase1()
+		if self.save_results and (self.problem.data_id is None) and (self.problem.problem_id is None):
+			self.save_results = False
+			print('Warning: The results will not be saved because the problem has not been initialized with data_id and problem_id.')
+
+		self.__phase1()
 		if self.print_results:
-			print('----------------------------------------\n')
-		if self.artificial_problem.Z > 1e-10:
-			ph1_finish_state = 'infeasible'
-			self.problem.state = 'infeasible'
-		if self.print_results:
-			print(f'Finished artificial problem ({ph1_finish_state})')
-			print(f'Solution:\n\tvb = {self.artificial_problem.vb}\n\txb = {self.artificial_problem.xb}\n\tr = {self.artificial_problem.r}\n\tZ = {self.artificial_problem.Z}')
+			print(f'\n-------------------[Problem: {self.problem.data_id}, {self.problem.problem_id}]-------------------\n')
+
+		if self.save_results:
+			self.results_file.write(f'\t* Finished artificial problem after {self.artificial_problem.iterations} iterations with state: {self.artificial_problem.state.capitalize()}.\n')
+			self.results_file.write(f'\t* Solution:\n\t\tvb = {self.artificial_problem.vb}\n\t\txb = {self.artificial_problem.xb}\n\t\tr = {self.artificial_problem.r}\n\t\tZ = {self.artificial_problem.Z}\n')
 		
-		if ph1_finish_state in ['optimal', 'unbounded']:
-			ph2_finish_state = self.__phase2()
+		if self.print_results:
+			print(f'Finished artificial problem after {self.artificial_problem.iterations} iterations with state: {self.artificial_problem.state.capitalize()}.')
+			print(f'Solution:\n\tvb = {self.artificial_problem.vb}\n\txb = {self.artificial_problem.xb}\n\tr = {self.artificial_problem.r}\n\tZ = {self.artificial_problem.Z}')		
+
+		if self.artificial_problem.Z > 1e-10:
+			self.problem.state = 'infeasible'		   
+		
+		if self.problem.state is None: # If the problem is not infeasible
+			self.__phase2()
+			if self.save_results:
+				self.results_file.write(f'\t* Finished problem after {self.problem.iterations} iterations with state: {self.problem.state.capitalize()}.\n')
+				self.results_file.write(f'\t* Solution:\n\t\tvb = {self.problem.vb}\n\t\txb = {self.problem.xb}\n\t\tr = {self.problem.r}\n\t\tZ = {self.problem.Z}\n')
 			if self.print_results:
-				print('----------------------------------------\n')
-				print(f'Finished problem ({ph2_finish_state})')
+				print('\n-------------------\n')
+				print(f'Finished problem after {self.problem.iterations} iterations with state {self.problem.state.capitalize()}.')
 				print(f'Solution:\n\tvb = {self.problem.vb}\n\txb = {self.problem.xb}\n\tr = {self.problem.r}\n\tZ = {self.problem.Z}')
-			self.problem.state = ph2_finish_state
+		else:
+			if self.print_results:
+				print('\n-------------------\n')
+				print('The problem is infeasible.')
+			if self.save_results:
+				self.results_file.write('\nPHASE 2: Not executed because the problem is infeasible.\n')
+		
+		if self.save_results:
+			self.__write_solution_in_results_file()
 
-	##### PRIVATE METHODS ----------------------------------------------------------------------------------------------- #
+	#### PRIVATE METHODS ----------------------------------------------------------------------------------------------- #
 
-	#### Methods for each phase
+	### Methods for each phase
 
 	def __initialize_values(self, problem: Problem, is_artificial: bool = False) -> None:
 		self.m, self.n = problem.A.shape
@@ -63,6 +87,9 @@ class Simplex:
 			self.C_N = np.zeros(self.n - self.m, dtype=np.int32)
 			self.X_B = problem.b
 			self.__calculate_z()
+			if self.save_results:
+				self.__initialize_results_file()
+				self.results_file.write('PHASE I:\n')
 		else:
 			assert self.B_variables is not None, 'The B_variables must be initialized'
 			assert self.B_inv is not None, 'The B_inv must be initialized'
@@ -73,23 +100,29 @@ class Simplex:
 			self.C_N = problem.c[self.N_variables]
 			self.X_B = np.dot(self.B_inv, problem.b)
 			self.__calculate_z()
+			if self.save_results:
+				self.results_file.write('\nPHASE II:\n')
 
 		if self.print_iters:
 			word_print = 'ART. ' if is_artificial else ''
 			print(f'--------------- INITIAL VALUES {word_print}PROBLEM ---------------\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
 
-	def __phase1(self) -> str:
+	def __phase1(self) -> Tuple[str, int]:
 		self.__generate_artificial_problem()
-		finish_state = self.__run(problem=self.artificial_problem, is_artificial=True)
-		return finish_state
+		finish_state, iters = self.__run(problem=self.artificial_problem, is_artificial=True)
+		self.artificial_problem.state = finish_state
+		self.artificial_problem.iterations = iters
+		return finish_state, iters
 
-	def __phase2(self) -> str:
-		finish_state = self.__run(problem=self.problem, is_artificial=False)
-		return finish_state
+	def __phase2(self) -> Tuple[str, int]:
+		finish_state, iters = self.__run(problem=self.problem, is_artificial=False)
+		self.problem.state = finish_state
+		self.problem.iterations = iters
+		return finish_state, iters
 
-	### Methods for the execution of the algorithm
+	## Methods for the execution of the algorithm
 
-	def __run(self, problem: Problem, is_artificial: bool = False) -> str:
+	def __run(self, problem: Problem, is_artificial: bool = False) -> Tuple[str, int]:
 		self.__initialize_values(problem=problem, is_artificial=is_artificial)
 		
 		state: Optional[Union[Literal['optimal'], Literal['unbounded'], Literal['infeasible']]] = None
@@ -116,9 +149,12 @@ class Simplex:
 			self.__pivot(problem=problem, index_entering=index_entering, index_leaving=index_leaving, theta=theta, d_B=d_B, reduced_costs=reduced_costs)
 			self.__calculate_z(theta=theta, r_q=reduced_costs[index_entering])
 
+			if self.save_results:
+				self.__save_iteration_results(iter=iter, index_entering=index_entering, index_leaving=index_leaving, theta=theta)
+
 			iter += 1
 
-		return state
+		return state, iter - 1
 				
 	# Other methods
 
@@ -222,3 +258,29 @@ class Simplex:
 		
 		self.Z = np.dot(self.C_B, self.X_B)
 		return self.Z
+	
+	def __initialize_results_file(self) -> None:
+		"""
+		Initializes the results file.
+		"""
+		open(f'./results/results_d{self.problem.data_id}_p{self.problem.problem_id}.txt', 'w') # Clear the file
+		self.results_file = open(f'./results/results_d{self.problem.data_id}_p{self.problem.problem_id}.txt', 'a') # Open the file in append mode
+
+	def __save_iteration_results(self, iter: int, index_entering: int, index_leaving: int, theta: np.float64) -> None:
+		"""
+		Saves the results of the iteration in the results file.
+		"""
+		self.results_file.write(f'\t* ITER. {iter} --> Var. IN = {self.N_variables[index_entering]} [q = {index_entering}], Var. OUT = {self.B_variables[index_leaving]} [B(p) = {index_leaving}], Theta* = {theta:.4f}, Z = {self.Z:.4f}\n')
+
+	def __write_solution_in_results_file(self) -> None:
+		"""
+		Writes the final solution of the problem in the results file.
+		"""
+		self.results_file.write(f'\n----------------------------------------\n\n')
+		if self.problem.state == 'optimal':
+			self.results_file.write(f'The problem is optimal. The solution found is:\n\tvb = {self.problem.vb}\n\txb = {self.problem.xb}\n\tr = {self.problem.r}\n\tZ = {self.problem.Z}\n')
+		elif self.problem.state == 'unbounded':
+			self.results_file.write('The problem is unbounded.\n')
+		else:
+			self.results_file.write('The problem is infeasible.\n')
+		
