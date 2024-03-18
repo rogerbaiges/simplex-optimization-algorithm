@@ -140,7 +140,7 @@ class Simplex:
 
 			if self.print_iters:
 				word_print = 'Art. ' if is_artificial else ''
-				print(f'---------------[{word_print}Problem: Iter. {iter}]---------------')
+				print(f'---------------[{word_print}Problem: {self.problem.data_id}, {self.problem.problem_id} | Iter. {iter}]---------------')
 			
 			self.__pivot(problem=problem, index_entering=index_entering, index_leaving=index_leaving, theta=theta, d_B=d_B, reduced_costs=reduced_costs)
 			self.__calculate_z(theta=theta, r_q=reduced_costs[index_entering])
@@ -233,8 +233,8 @@ class Simplex:
 		self.X_B = np.array([theta if i == index_leaving else self.X_B[i] + theta * d_B[i] for i in range(self.m)])
 
 		if self.print_iters:
-			print(f'FINAL ITER VALUES:\n\nR={reduced_costs}\n\nd_B={d_B}\nTheta={theta}\n\nVariable entering --> {var_entering}\nVariable leaving --> {var_leaving}\n\nB_variables={self.B_variables}\nN_variables={self.N_variables}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nX_B={self.X_B}\n\nC_B={self.C_B}\nC_N={self.C_N}\n\nZ={self.Z}\n')
-	
+			self.__print_final_iter_values(reduced_costs=reduced_costs, d_B=d_B, theta=theta, var_entering=var_entering, var_leaving=var_leaving)
+
 	def __is_optimal(self, reduced_costs: NDArray) -> bool:
 		"""
 		Returns True if the problem is optimal.
@@ -301,8 +301,9 @@ class Simplex:
 		"""
 		Prints the results of the problem.
 		"""
-		print('\n-------------------\n')
-		word_print = 'artificial ' if problem is self.artificial_problem else ''
+		is_artificial = problem is self.artificial_problem
+		print('\n-------------------\n') if not is_artificial else None
+		word_print = 'artificial ' if is_artificial else ''
 		if problem.state == 'infeasible':
 			print(f'The problem is infeasible.')
 		else:
@@ -315,4 +316,9 @@ class Simplex:
 		"""
 		word_print = 'ART. ' if problem is self.artificial_problem else ''
 		print(f'--------------- INITIAL VALUES {word_print}PROBLEM ---------------\n\nB_variables={self.B_variables}\n\nN_variables={self.N_variables}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nC_B={self.C_B}\n\nC_N={self.C_N}\n\nX_B={self.X_B}\n\nZ={self.Z}\n')
-		
+	
+	def __print_final_iter_values(self, reduced_costs: NDArray, d_B: NDArray, theta: np.float64, var_entering: int, var_leaving: int) -> None:
+		"""
+		Prints the final values of the iteration.
+		"""
+		print(f'FINAL ITER. VALUES:\n\nR={reduced_costs}\n\nd_B={d_B}\nTheta={theta}\n\nVar. IN --> {var_entering}\nVar. OUT --> {var_leaving}\n\nB_variables={self.B_variables}\nN_variables={self.N_variables}\n\nB_inv=\n{self.B_inv}\n\nA_N=\n{self.A_N}\n\nX_B={self.X_B}\n\nC_B={self.C_B}\nC_N={self.C_N}\n\nZ={self.Z}\n')

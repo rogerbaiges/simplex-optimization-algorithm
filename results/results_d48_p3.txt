@@ -24,7 +24,7 @@ PHASE I:
    1.           1.           1.           4.27777778  96.77777778]
 		Z = 484.50000000000006
 
-PHASE 2: Not executed because the problem is infeasible.
+PHASE II: Not executed because the problem is infeasible.
 
 ----------------------------------------
 
