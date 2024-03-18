@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union, Literal
 from numpy.typing import NDArray
 import numpy as np
 import re
@@ -31,7 +31,7 @@ class Problem:
 		self.xb: Optional[NDArray] = None
 		self.Z: Optional[np.float64] = None
 		self.r: Optional[NDArray] = None
-		self.state: Optional[str] = None
+		self.state: Optional[Union[Literal['optimal'], Literal['unbounded'], Literal['infeasible']]] = None
 		self.iterations: Optional[int] = None
 
 		if (data_id is not None) and (problem_id is not None):
