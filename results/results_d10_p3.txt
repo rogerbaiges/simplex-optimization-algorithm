@@ -32,7 +32,7 @@ PHASE I:
    1.           1.           1.89025457  22.7567119    1.25045045]
 		Z = 566.1497439348061
 
-PHASE 2: Not executed because the problem is infeasible.
+PHASE II: Not executed because the problem is infeasible.
 
 ----------------------------------------
 
