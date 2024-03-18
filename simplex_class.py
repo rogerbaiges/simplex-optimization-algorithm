@@ -4,7 +4,7 @@ from numpy.typing import NDArray
 import numpy as np
 
 class Simplex:
-	def __init__(self, print_results: bool = False, print_iters: bool = False, save_results: bool = True) -> None:
+	def __init__(self, tolerance: float = 1e-10, print_results: bool = False, print_iters: bool = False, save_results: bool = True) -> None:
 		self.problem: Optional[Problem] = None
 		self.artificial_problem: Optional[Problem] = None
 
@@ -18,6 +18,8 @@ class Simplex:
 		self.Z: Optional[np.float64] = None
 		self.n: Optional[np.int32] = None
 		self.m: Optional[np.int32] = None
+
+		self.tolerance: float = tolerance
 
 		self.print_results: bool = print_results
 		self.print_iters: bool = print_iters
@@ -50,7 +52,7 @@ class Simplex:
 		if self.print_results:
 			self.__print_problem_results(problem=self.artificial_problem)	
 
-		self.__check_if_feasible(tolerance=1e-10)		   
+		self.__check_if_feasible()		   
 		
 		if self.problem.state is None: # If the problem is not infeasible
 			self.__phase2()
@@ -157,11 +159,14 @@ class Simplex:
 				word_print = 'Art. ' if is_artificial else ''
 				print(f'---------------[{word_print}Problem: {self.problem.data_id}, {self.problem.problem_id} | Iter. {iter}]---------------')
 			
-			self.__pivot(problem=problem, index_entering=index_entering, index_leaving=index_leaving, theta=theta, d_B=d_B, reduced_costs=reduced_costs)
+			var_entering = self.N_variables[index_entering]
+			var_leaving = self.B_variables[index_leaving]
+
+			self.__pivot(problem=problem, index_entering=index_entering, index_leaving=index_leaving, var_entering=var_entering, var_leaving=var_leaving, theta=theta, d_B=d_B, reduced_costs=reduced_costs)
 			self.__calculate_z(theta=theta, r_q=reduced_costs[index_entering])
 
 			if self.save_results:
-				self.__save_iteration_results(iter=iter, index_entering=index_entering, index_leaving=index_leaving, theta=theta)
+				self.__write_iteration_results(iter=iter, var_entering=var_entering, var_leaving=var_leaving, index_entering=index_entering, index_leaving=index_leaving, theta=theta)
 
 			iter += 1
 
@@ -232,13 +237,10 @@ class Simplex:
 					index_leaving = i
 		return index_leaving, theta
 
-	def __pivot(self, problem: Problem, index_entering: int, index_leaving: int, theta, d_B: NDArray, reduced_costs: NDArray) -> None:
+	def __pivot(self, problem: Problem, index_entering: int, index_leaving: int, var_entering: int, var_leaving: int, theta, d_B: NDArray, reduced_costs: NDArray) -> None:
 		"""
 		Executes the pivot operation of the simplex algorithm (updates the values of the problem after an iteration).
-		"""
-		var_entering = self.N_variables[index_entering]
-		var_leaving = self.B_variables[index_leaving]
-		
+		"""	
 		self.B_variables[index_leaving] = var_entering
 		self.N_variables[index_entering] = var_leaving
 		self.A_N[:, index_entering] = problem.A[:, var_leaving]
@@ -262,11 +264,11 @@ class Simplex:
 		"""
 		return np.all(d_B >= 0)
 	
-	def __check_if_feasible(self, tolerance: float = 1e-10) -> None:
+	def __check_if_feasible(self) -> None:
 		"""
 		Checks if the problem is feasible. If it is not, it changes the state of the problem to 'infeasible'.
 		"""
-		if self.artificial_problem.Z > tolerance:
+		if self.artificial_problem.Z > self.tolerance:
 			self.problem.state = 'infeasible'
 
 	def __calculate_z(self, theta = None, r_q = None) -> np.float64:
@@ -289,11 +291,11 @@ class Simplex:
 
 	# Methods for printing and saving (writing to .txt) the results
 
-	def __save_iteration_results(self, iter: int, index_entering: int, index_leaving: int, theta: np.float64) -> None:
+	def __write_iteration_results(self, iter: int, var_entering: int, var_leaving: int, index_entering: int, index_leaving: int, theta: np.float64) -> None:
 		"""
 		Saves the results of the iteration in the results file.
 		"""
-		self.results_file.write(f'\t* ITER. {iter} --> Var. IN = {self.N_variables[index_entering]} [q = {index_entering}], Var. OUT = {self.B_variables[index_leaving]} [B(p) = {index_leaving}], Theta* = {theta:.4f}, Z = {self.Z:.4f}\n')
+		self.results_file.write(f'\t* ITER. {iter} --> Var. IN = {var_entering} (N_variables[{index_entering}]), Var. OUT = {var_leaving} (B_variables[{index_leaving}]), Theta* = {theta:.4f}, Z = {self.Z:.4f}\n')
 
 	def __write_final_solution_in_results_file(self) -> None:
 		"""
