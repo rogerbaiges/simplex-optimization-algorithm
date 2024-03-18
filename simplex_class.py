@@ -276,8 +276,8 @@ class Simplex:
 		if (theta is not None) and (r_q is not None):
 			assert self.Z is not None, 'The Z value must be initialized before updating it'
 			self.Z = self.Z + theta * r_q
-		
-		self.Z = np.dot(self.C_B, self.X_B)
+		else:
+			self.Z = np.dot(self.C_B, self.X_B)
 		return self.Z
 	
 	def __initialize_results_file(self) -> None:
