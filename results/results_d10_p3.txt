@@ -1,0 +1,39 @@
+PHASE I:
+	* ITER. 1 --> Var. IN = 23 [q = 0], Var. OUT = 0 [B(p) = 3], Theta* = 0.4030, Z = 1118.5970
+	* ITER. 2 --> Var. IN = 29 [q = 1], Var. OUT = 1 [B(p) = 9], Theta* = 0.2889, Z = 1027.0175
+	* ITER. 3 --> Var. IN = 0 [q = 5], Var. OUT = 5 [B(p) = 3], Theta* = 0.2755, Z = 1015.2003
+	* ITER. 4 --> Var. IN = 21 [q = 8], Var. OUT = 8 [B(p) = 1], Theta* = 0.6749, Z = 783.8610
+	* ITER. 5 --> Var. IN = 28 [q = 5], Var. OUT = 0 [B(p) = 8], Theta* = 0.0443, Z = 733.4261
+	* ITER. 6 --> Var. IN = 1 [q = 2], Var. OUT = 2 [B(p) = 9], Theta* = 0.1299, Z = 714.5417
+	* ITER. 7 --> Var. IN = 2 [q = 3], Var. OUT = 3 [B(p) = 9], Theta* = 0.1389, Z = 711.2520
+	* ITER. 8 --> Var. IN = 0 [q = 7], Var. OUT = 7 [B(p) = 8], Theta* = 0.1049, Z = 699.6104
+	* ITER. 9 --> Var. IN = 27 [q = 10], Var. OUT = 10 [B(p) = 7], Theta* = 0.0444, Z = 685.7354
+	* ITER. 10 --> Var. IN = 3 [q = 3], Var. OUT = 2 [B(p) = 9], Theta* = 0.0178, Z = 683.8418
+	* ITER. 11 --> Var. IN = 2 [q = 11], Var. OUT = 11 [B(p) = 9], Theta* = 0.0068, Z = 682.2607
+	* ITER. 12 --> Var. IN = 24 [q = 14], Var. OUT = 14 [B(p) = 4], Theta* = 39.4250, Z = 642.8357
+	* ITER. 13 --> Var. IN = 11 [q = 11], Var. OUT = 2 [B(p) = 9], Theta* = 0.0178, Z = 641.5420
+	* ITER. 14 --> Var. IN = 2 [q = 13], Var. OUT = 13 [B(p) = 9], Theta* = 0.0655, Z = 638.9717
+	* ITER. 15 --> Var. IN = 10 [q = 7], Var. OUT = 0 [B(p) = 7], Theta* = 0.0243, Z = 638.0234
+	* ITER. 16 --> Var. IN = 26 [q = 16], Var. OUT = 16 [B(p) = 6], Theta* = 59.0830, Z = 578.9404
+	* ITER. 17 --> Var. IN = 7 [q = 13], Var. OUT = 2 [B(p) = 8], Theta* = 0.0220, Z = 577.1570
+	* ITER. 18 --> Var. IN = 2 [q = 6], Var. OUT = 6 [B(p) = 8], Theta* = 0.0259, Z = 576.8759
+	* ITER. 19 --> Var. IN = 6 [q = 11], Var. OUT = 11 [B(p) = 8], Theta* = 0.0092, Z = 575.6720
+	* ITER. 20 --> Var. IN = 11 [q = 18], Var. OUT = 18 [B(p) = 8], Theta* = 2.1021, Z = 574.8202
+	* ITER. 21 --> Var. IN = 0 [q = 0], Var. OUT = 23 [B(p) = 7], Theta* = 14.8729, Z = 566.1497
+	* Finished artificial problem after 21 iterations with state: Optimal.
+	* Solution:
+		vb = [20  8 22  5 14 25 16 23 18 13]
+		xb = [3.90075982e+02 9.93181563e-01 9.31998804e+01 3.42701207e-01
+ 7.37418190e+01 6.80009944e+01 7.48327016e+01 1.48728870e+01
+ 3.41277709e+00 2.65791933e-01]
+		r = [ 85.55169526   2.25045045 255.54880939  56.93665284  95.21778625
+   1.         141.85608762 183.15475309   0.55565773 136.34130313
+   2.89025457  72.23831632 230.05621472 170.7475085    1.
+   1.           1.           1.89025457  22.7567119    1.25045045]
+		Z = 566.1497439348061
+
+PHASE 2: Not executed because the problem is infeasible.
+
+----------------------------------------
+
+The problem is infeasible.
