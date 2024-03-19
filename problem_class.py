@@ -39,7 +39,7 @@ class Problem:
 
 	def __read_problem(self) -> None:
 		with open(f'./data/data.txt', 'r') as file:
-			truncated_input = False
+			truncated_input_c, truncated_input_A, truncated_input_b = False, False, False
 
 			# Advancing to the required problem			
 			regex_data_id = r'datos\s+{}'.format(re.escape(str(self.data_id)))
@@ -57,12 +57,12 @@ class Problem:
 			line = file.readline()
 			while (not line.strip()) or ('column' in line.lower()):
 				if 'column' in line.lower():
-					truncated_input = True
+					truncated_input_c = True
 				line = file.readline()
 
 			c_line = line.strip().split()
 
-			if truncated_input:
+			if truncated_input_c:
 				line = file.readline()
 				while (not line.strip()) or ('column' in line.lower()):
 					line = file.readline()
@@ -77,6 +77,8 @@ class Problem:
 			A_lines = []
 			line = file.readline()
 			while (not line.strip()) or ('column' in line.lower()):
+				if 'column' in line.lower():
+					truncated_input_A = True
 				line = file.readline()
 
 			line = line.strip()
@@ -84,7 +86,7 @@ class Problem:
 				A_lines.append(line.split())
 				line = file.readline().strip()
 
-			if truncated_input:
+			if truncated_input_A:
 				while (not line.strip()) or ('column' in line.lower()):
 					line = file.readline()
 
@@ -97,7 +99,20 @@ class Problem:
 			while not 'b=' in line:
 				line = file.readline()
 
-			b_line = file.readline().strip().split()
+			line = file.readline()
+			while (not line.strip()) or ('column' in line.lower()):
+				if 'column' in line.lower():
+					truncated_input_b = True
+				line = file.readline()
+
+			b_line = line.strip().split()
+
+			if truncated_input_b:
+				line = file.readline()
+				while (not line.strip()) or ('column' in line.lower()):
+					line = file.readline()
+
+				b_line += line.strip().split()
 
 		# Convert to numpy array
 		self.c = np.array([self.dtype(x) for x in c_line])
