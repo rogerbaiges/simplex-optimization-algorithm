@@ -1,4 +1,4 @@
-from typing import Optional, Union, Literal
+from typing import Optional, Literal
 from numpy.typing import NDArray
 import numpy as np
 import re
@@ -120,4 +120,4 @@ class Problem:
 		self.b = np.array([self.dtype(x) for x in b_line])
 
 	def __str__(self) -> str:
-		return f'DATA_ID={self.data_id}\nPROBLEM_ID={self.problem_id}\n\nSOLUTION ({self.state}):\n\tvb={self.vb}\n\n\txb={self.xb}\n\n\tZ={self.Z}\n\n\tr={self.r}'
+		return f'DATA_ID={self.data_id}\nPROBLEM_ID={self.problem_id}\n\nSOLUTION ({self.state}):\n\tvb={self.vb}\n\n\txb={self.xb}\n\n\tZ={self.Z}\n\n\tr={self.r}\n\n\Iterations={self.iterations}'
