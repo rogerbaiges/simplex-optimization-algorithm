@@ -31,7 +31,7 @@ class Problem:
 		self.xb: Optional[NDArray] = None
 		self.Z: Optional[np.float64] = None
 		self.r: Optional[NDArray] = None
-		self.state: Optional[Union[Literal['optimal'], Literal['unbounded'], Literal['infeasible']]] = None
+		self.state: Optional[Literal['optimal', 'unbounded', 'infeasible']] = None
 		self.iterations: Optional[int] = None
 
 		if (data_id is not None) and (problem_id is not None):
@@ -116,7 +116,7 @@ class Problem:
 
 		# Convert to numpy array
 		self.c = np.array([self.dtype(x) for x in c_line])
-		self.A = np.array([[self.dtype(x) for x in line] for line in A_lines])  # Asegura que line no esté vacío
+		self.A = np.array([[self.dtype(x) for x in line] for line in A_lines])
 		self.b = np.array([self.dtype(x) for x in b_line])
 
 	def __str__(self) -> str:
