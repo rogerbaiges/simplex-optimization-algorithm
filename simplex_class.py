@@ -149,7 +149,7 @@ class Simplex:
 				break
 			index_entering = self.__select_entering_variable(reduced_costs=reduced_costs)
 
-			d_B = self.__calculate_feasible_basic_direction(index_entering=index_entering)
+			d_B = self.__calculate_basic_feasible_direction(index_entering=index_entering)
 			if self.__is_unbounded(d_B=d_B):
 				state = 'unbounded'
 				break
@@ -200,9 +200,9 @@ class Simplex:
 		"""
 		return self.C_N - np.dot(np.dot(self.C_B, self.B_inv), self.A_N)
 	
-	def __calculate_feasible_basic_direction(self, index_entering: int) -> NDArray:
+	def __calculate_basic_feasible_direction(self, index_entering: int) -> NDArray:
 		"""
-		Calculates the feasible basic direction of the problem.
+		Calculates the basic feasible direction of the problem.
 		"""
 		d_B = -np.dot(self.B_inv, self.A_N[:, index_entering])
 		return d_B
