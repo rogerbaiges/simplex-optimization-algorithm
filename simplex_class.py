@@ -172,7 +172,7 @@ class Simplex:
 
 		return state, iter - 1
 				
-	# Other methods
+	# Auxiliary methods
 
 	def __generate_artificial_problem(self) -> None:
 		"""
@@ -281,15 +281,15 @@ class Simplex:
 		else:
 			self.Z = np.dot(self.C_B, self.X_B)
 		return self.Z
-	
+
+	# Methods for printing and saving (writing to .txt) the results
+
 	def __initialize_results_file(self) -> None:
 		"""
 		Initializes the results file.
 		"""
 		open(f'./results/results_d{self.problem.data_id}_p{self.problem.problem_id}.txt', 'w') # Clear the file
 		self.results_file = open(f'./results/results_d{self.problem.data_id}_p{self.problem.problem_id}.txt', 'a') # Open the file in append mode
-
-	# Methods for printing and saving (writing to .txt) the results
 
 	def __write_iteration_results(self, iter: int, var_entering: int, var_leaving: int, index_entering: int, index_leaving: int, theta: np.float64) -> None:
 		"""
