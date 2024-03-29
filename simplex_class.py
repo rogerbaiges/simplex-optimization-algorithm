@@ -138,7 +138,7 @@ class Simplex:
 		"""
 		self.__initialize_values(problem=problem, is_artificial=is_artificial)
 		
-		state: Optional[Union[Literal['optimal'], Literal['unbounded'], Literal['infeasible']]] = None
+		state: Optional[Literal['optimal', 'unbounded', 'infeasible', 'infeasible (degeneracy)']] = None
 		iter = 1
 		
 		while True:
@@ -266,10 +266,12 @@ class Simplex:
 	
 	def __check_if_feasible(self) -> None:
 		"""
-		Checks if the problem is feasible. If it is not, it changes the state of the problem to 'infeasible'.
+		Checks if the problem is feasible. If it is not, it changes the state of the problem to 'infeasible' or 'infeasible (degeneracy)', depending on the case.
 		"""
 		if self.artificial_problem.Z > self.tolerance:
 			self.problem.state = 'infeasible'
+		elif np.any(self.artificial_problem.vb >= self.n - self.m):
+			self.problem.state = 'infeasible (degeneracy)'	
 
 	def __calculate_z(self, theta = None, r_q = None) -> np.float64:
 		"""

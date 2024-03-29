@@ -31,7 +31,7 @@ class Problem:
 		self.xb: Optional[NDArray] = None
 		self.Z: Optional[np.float64] = None
 		self.r: Optional[NDArray] = None
-		self.state: Optional[Literal['optimal', 'unbounded', 'infeasible']] = None
+		self.state: Optional[Literal['optimal', 'unbounded', 'infeasible', 'infeasible (degeneracy)']] = None
 		self.iterations: Optional[int] = None
 
 		if (data_id is not None) and (problem_id is not None):
