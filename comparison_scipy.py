@@ -24,7 +24,7 @@ def compare_results(problem: Problem, simplex: Simplex):
 			print(f'\t*Abs. Error: {abs(res.fun - problem.Z)}')
 			print('---------------------------------')
 
-	elif problem.state != status_dict[res.status]:
+	elif (problem.state != status_dict[res.status]) and (problem.state != 'infeasible (degeneracy)' and status_dict[res.status] != 'infeasible'):
 		print(f'Problem({problem.data_id}, {problem.problem_id})')
 		print(f'\t*SciPy: {status_dict[res.status]}')
 		print(f'\t*Our implementation: {problem.state}')

@@ -54,7 +54,7 @@ class Simplex:
 
 		self.__check_if_feasible()		   
 		
-		if self.problem.state is None: # If the problem is not infeasible
+		if self.problem.state is None: # If the problem has not been classified as infeasible
 			self.__phase2()
 			
 			if self.save_results:
